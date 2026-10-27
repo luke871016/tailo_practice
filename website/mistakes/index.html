@@ -6,7 +6,10 @@
   <meta name="theme-color" content="#efefef">
   <title>錯題本｜練台羅</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235c8273'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='white' font-family='sans-serif'%3E%C3%A1%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css?v=5">
 </head>
 <body>
   <div class="app">
@@ -18,7 +21,9 @@
       <span class="icon-btn" aria-hidden="true"></span>
     </header>
 
-    <div class="chips" id="filters" hidden></div>
+    <p class="mistake-scope" id="scopeLabel" hidden></p>
+    <div class="chips" id="filters" role="group" aria-label="練習" hidden></div>
+    <div class="chips chips-levels" id="levelFilters" role="group" hidden></div>
 
     <ul class="review-list card mistake-list" id="mistakeList" hidden></ul>
 
@@ -29,13 +34,13 @@
     </div>
 
     <div class="mistake-footer" id="footer" hidden>
-      <p class="mistake-hint">「已答對」表示這題答錯後，又在練習中答對了</p>
+      <p class="mistake-hint" id="fixedHint" hidden>「已答對」表示這題答錯後，又在練習中答對了</p>
       <button class="btn btn-ghost btn-block" id="clearBtn" type="button">清空錯題</button>
     </div>
   </div>
 
-  <script src="../js/common.js"></script>
+  <script src="../js/common.js?v=3"></script>
   <script src="../js/tones.js"></script>
-  <script src="mistakes.js"></script>
+  <script src="mistakes.js?v=4"></script>
 </body>
 </html>

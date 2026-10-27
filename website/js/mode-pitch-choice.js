@@ -114,15 +114,12 @@
 
     function refresh() {
       if (api.isAnswered()) return;
-      const notes = [];
-      if (kind === 'single') {
-        if (item.p[0][2] === 8) notes.push(TONE_8_NOTE);
-      } else {
-        if (item.p[0][2] === 5) notes.push(SANDHI_5_NOTE);
-        if (item.p[1][2] === 8) notes.push(TONE_8_NOTE);
+      if (kind === 'sandhi') {
+        api.setStatus('選出這個詞實際唸的音值');
+        return;
       }
-      if (notes.length) api.setStatus(notes.join('；'));
-      else api.setStatus(kind === 'sandhi' ? '選出這個詞實際唸的音值（前字變調）' : '選出這個音節的音值');
+      if (item.p[0][2] === 8) api.setStatus(TONE_8_NOTE);
+      else api.setStatus('選出這個音節的音值');
     }
 
     function submit() {

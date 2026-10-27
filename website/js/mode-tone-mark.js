@@ -9,8 +9,8 @@
   const PART_GAP = 30;
   const SYLLABLE_GAP = 22;
   const PAD_X = 40;
-  const SINGLE_BASELINE = 215;
-  const SINGLE_HEIGHT = 300;
+  const SINGLE_BASELINE = 183;
+  const SINGLE_HEIGHT = 268;
   const ROW_BASELINE = 180;
   const ROW_HEIGHT = 240;
   const STACK_TOP = 175;
@@ -143,9 +143,8 @@
     return `${prefix}調符和位置都不對`;
   }
 
-  function create(options) {
-    const noneButton = !!(options && options.noneButton);
-    const drawHint = noneButton ? '在字母上方畫出調符' : '在要標調的音節上方畫調符，免標的留白';
+  function create() {
+    const drawHint = '在韻母上方畫出調符。不用調符就留白，按「確定」送出。';
     let api = null;
     let syls = [];
     let markLayer = null;
@@ -215,11 +214,6 @@
           l.node.textContent = l.ch;
           svg.appendChild(l.node);
         });
-        const first = s.letters[0];
-        const last = s.letters[s.letters.length - 1];
-        svg.insertBefore(svgEl('line', {
-          class: 'stage-guide', x1: first.x - 10, x2: last.x + last.w + 10, y1: s.markY, y2: s.markY,
-        }), svg.firstChild);
       };
 
       if (kind === 'stack') {
@@ -311,14 +305,16 @@
       if (result) {
         s.guess = { tone: result.tone, index: nearestLetter(result.cx, s.markY, k).index };
         s.unknown = false;
+        // 筆畫資料要留著，下一筆才有辦法跟它併成雙筆調符；畫面上只留標準調符
+        s.strokes.forEach((st) => st.node.remove());
       } else {
         s.guess = null;
         s.unknown = true;
+        s.strokes.forEach((st) => {
+          st.node.classList.add('is-unknown');
+          if (!st.node.parentNode) s.inkParent.appendChild(st.node);
+        });
       }
-      s.strokes.forEach((st) => {
-        st.node.classList.toggle('is-settled', !!result);
-        st.node.classList.toggle('is-unknown', !result);
-      });
     }
 
     function onStroke(stroke) {
@@ -329,6 +325,7 @@
         s.strokes.forEach((st) => st.node.remove());
         s.strokes = [];
       }
+      s.inkParent = stroke.node.parentNode;
       s.strokes.push(stroke);
       evaluateSyllable(k);
     }
@@ -341,7 +338,7 @@
       const anyStroke = syls.some((s) => s.strokes.length);
       const single = syls.length === 1;
 
-      api.setSubmitEnabled(single ? !!syls[0].guess : !anyUnknown);
+      api.setSubmitEnabled(!anyUnknown);
       if (anyUnknown) api.setStatus('認不出這個符號，請再畫一次', true);
       else if (anyStroke) api.setStatus(single ? '按「確定」送出，或直接重畫' : '畫好了就按「確定」，可以再修改');
       else api.setStatus(drawHint);
@@ -355,15 +352,11 @@
       });
     }
 
-    function submit(action) {
-      const chooseNone = action === 'none';
-      const single = syls.length === 1;
-      if (!chooseNone) {
-        if (syls.some((s) => s.unknown)) return null;
-        if (single && !syls[0].guess) return null;
-      }
+    function submit() {
+      if (syls.some((s) => s.unknown)) return null;
 
-      const results = syls.map((s) => judgeSyllable(s, chooseNone ? null : s.guess));
+      const single = syls.length === 1;
+      const results = syls.map((s) => judgeSyllable(s, s.guess));
       const ok = results.every((r) => r.ok);
       const answer = single && !results[0].user
         ? '無調符'
@@ -389,9 +382,10 @@
       return { ok, verdict, meta, answer };
     }
 
-    const actions = [{ action: 'clear', label: '重畫', style: 'ghost' }];
-    if (noneButton) actions.push({ action: 'none', label: '無調符', style: 'outline' });
-    actions.push({ action: 'submit', label: '確定', style: 'primary' });
+    const actions = [
+      { action: 'clear', label: '重畫', style: 'ghost' },
+      { action: 'submit', label: '確定', style: 'primary' },
+    ];
 
     return {
       top: 'listen',

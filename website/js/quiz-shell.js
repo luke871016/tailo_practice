@@ -3,7 +3,7 @@
 // 各單元以「模式」掛上來，模式物件需提供：
 //   top: 'listen'（先聽音檔再作答）或 'prompt'（先看音節與漢字，作答後才播放）
 //   stage: 'svg'（畫在 SVG 上）或 'choices'（選擇題）
-//   actions: 作答按鈕 [{ action, label, style }]，action 為 clear / submit / none；選擇題可留空
+//   actions: 作答按鈕 [{ action, label, style }]，action 為 clear / submit；選擇題可留空
 //   helpExtra: 說明面板額外內容（HTML，選填）
 //   mount(api)、render(item)、refresh()、clear()、onStroke(stroke)
 //   submit(action) → null（不能送出）或 { ok, verdict, meta, answer, expect, answerPitch, expectPitch }
@@ -228,6 +228,17 @@
       renderQuestion();
     }
 
+    function layoutStage(item) {
+      if (!el.svg) {
+        mode.render(item);
+        return;
+      }
+      el.svg.textContent = '';
+      mode.render(item);
+      state.inkLayer = svgEl('g', {});
+      el.svg.appendChild(state.inkLayer);
+    }
+
     function renderQuestion() {
       const item = state.items[state.index];
       state.item = item;
@@ -252,13 +263,16 @@
         el.hintHanji.hidden = !showHanji;
       }
 
-      if (el.svg) el.svg.textContent = '';
-      mode.render(item);
-      if (el.svg) {
-        state.inkLayer = svgEl('g', {});
-        el.svg.appendChild(state.inkLayer);
-      }
+      layoutStage(item);
       mode.refresh();
+      // 畫聲調會依字母寬度排版。芫荽晚到的話，用系統字量到的位置會偏，字型到了再排一次
+      if (el.svg && document.fonts && !document.fonts.check('100px "Iansui"')) {
+        document.fonts.load('100px "Iansui"').then(() => {
+          if (state.item !== item || state.answered || state.active) return;
+          if (state.inkLayer && state.inkLayer.childNodes.length) return;
+          layoutStage(item);
+        }).catch(() => {});
+      }
       updateProgress();
 
       if (mode.top === 'listen') play(item.a);
@@ -481,7 +495,6 @@
     el.helpBtn.addEventListener('click', openHelp);
     el.helpSheet.addEventListener('click', (e) => { if (e.target === el.helpSheet) closeHelp(); });
 
-    const hasNone = mode.actions.some((a) => a.action === 'none');
     document.addEventListener('keydown', (e) => {
       if (!el.helpSheet.hidden) {
         if (e.key === 'Escape') closeHelp();
@@ -497,8 +510,6 @@
         else if (el.submitBtn && !el.submitBtn.disabled) submit('submit');
       } else if (!state.answered && mode.onKey && mode.onKey(e.key)) {
         e.preventDefault();
-      } else if (!state.answered && hasNone && (e.key === '0' || e.key.toLowerCase() === 'n')) {
-        submit('none');
       } else if (!state.answered && el.svg && (e.key === 'Backspace' || e.key === 'Escape')) {
         clearDrawing();
       }

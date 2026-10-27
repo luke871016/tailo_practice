@@ -1,23 +1,31 @@
 (function () {
   'use strict';
 
-  const { UNITS, audioUrl, mistakes, pitchCompare } = window.LianTailo;
+  const { GROUPS, UNITS, audioUrl, mistakes, pitchCompare } = window.LianTailo;
 
   const ICON_PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
   const ICON_DELETE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 
   const el = {
+    scope: document.getElementById('scopeLabel'),
     filters: document.getElementById('filters'),
+    levels: document.getElementById('levelFilters'),
     list: document.getElementById('mistakeList'),
     empty: document.getElementById('emptyState'),
     footer: document.getElementById('footer'),
+    hint: document.getElementById('fixedHint'),
     clearBtn: document.getElementById('clearBtn'),
   };
 
   const audio = new Audio();
   let filter = 'all';
 
-  const unitName = (unit) => (UNITS[unit] ? UNITS[unit].short : unit);
+  const groupById = (id) => GROUPS.find((g) => g.id === id);
+  const groupName = (id) => {
+    const group = groupById(id);
+    return group ? group.name : id;
+  };
+  const levelName = (unit) => (UNITS[unit] ? UNITS[unit].level : unit);
 
   function formatDate(ts) {
     const d = new Date(ts);
@@ -27,28 +35,128 @@
     return `${sameYear ? '' : `${d.getFullYear()}/`}${d.getMonth() + 1}/${d.getDate()}`;
   }
 
+  function unitsInFilter(value) {
+    if (value === 'all') return null;
+    const group = groupById(value);
+    return group ? group.units.slice() : [value];
+  }
+
+  function inFilter(unit, value) {
+    const units = unitsInFilter(value);
+    return !units || units.includes(unit);
+  }
+
+  function filterValid(value, counts) {
+    if (value === 'all') return true;
+    const group = groupById(value);
+    if (group) return group.units.some((unit) => counts[unit]);
+    return !!counts[value];
+  }
+
+  function scopeText(value) {
+    if (value === 'all') return '所有錯題';
+    const group = groupById(value);
+    if (group) return `「${group.name}」的錯題`;
+    const info = UNITS[value];
+    const name = info ? `${groupName(info.group)}・${info.level}` : value;
+    return `「${name}」的錯題`;
+  }
+
+  function addChip(parent, label, count, active, onClick) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `chip${active ? ' is-active' : ''}`;
+    btn.setAttribute('aria-pressed', String(active));
+    btn.textContent = `${label} ${count}`;
+    btn.addEventListener('click', onClick);
+    parent.appendChild(btn);
+  }
+
+  function collectGroups(counts) {
+    const known = new Set(GROUPS.flatMap((g) => g.units));
+    const groups = GROUPS.map((g) => ({
+      id: g.id,
+      name: g.name,
+      units: g.units.filter((unit) => counts[unit]),
+      count: g.units.reduce((sum, unit) => sum + (counts[unit] || 0), 0),
+    })).filter((g) => g.count);
+    const extras = Object.keys(counts).filter((unit) => !known.has(unit)).map((unit) => ({
+      id: unit,
+      name: unit,
+      units: [unit],
+      count: counts[unit],
+      extra: true,
+    }));
+    return groups.concat(extras);
+  }
+
   function renderFilters(all) {
     const counts = {};
     all.forEach((m) => { counts[m.unit] = (counts[m.unit] || 0) + 1; });
-    const units = Object.keys(UNITS).filter((u) => counts[u]).concat(Object.keys(counts).filter((u) => !UNITS[u]));
-    if (filter !== 'all' && !counts[filter]) filter = 'all';
+    if (!filterValid(filter, counts)) filter = 'all';
 
+    const choices = collectGroups(counts);
+    const showGroups = choices.length >= 2;
+    // 只剩一種練習時沒有練習列，「全部」就是這一種的全部難度
+    if (!showGroups && choices.length === 1 && filter === choices[0].id) filter = 'all';
+    const active = choices.find((g) => g.id === filter || g.units.includes(filter))
+      || (!showGroups && choices.length === 1 && !choices[0].extra ? choices[0] : null);
+    const showLevels = !!(active && !active.extra && active.units.length >= 2);
+    const levelsAreRoot = showLevels && !showGroups;
+    // 練習列收起來時，仍要標出是哪一種練習，難度名稱才不會跟另一種練習撞在一起
+    const singlePractice = !!(active && !showGroups && !active.extra);
+
+    el.scope.hidden = !singlePractice;
+    el.scope.textContent = singlePractice ? active.name : '';
+    el.filters.hidden = !showGroups;
     el.filters.textContent = '';
-    el.filters.hidden = units.length < 2;
-    [['all', '全部', all.length]].concat(units.map((u) => [u, unitName(u), counts[u]])).forEach(([value, label, n]) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = `chip${filter === value ? ' is-active' : ''}`;
-      btn.textContent = `${label} ${n}`;
-      btn.addEventListener('click', () => {
-        filter = value;
+    if (showGroups) {
+      addChip(el.filters, '全部', all.length, filter === 'all', () => {
+        filter = 'all';
         render();
       });
-      el.filters.appendChild(btn);
-    });
+      choices.forEach((g) => {
+        addChip(el.filters, g.name, g.count, !!(active && active.id === g.id), () => {
+          filter = g.id;
+          render();
+        });
+      });
+    }
+
+    el.levels.hidden = !showLevels;
+    el.levels.textContent = '';
+    el.levels.classList.toggle('is-root', levelsAreRoot);
+    if (showLevels) {
+      el.levels.setAttribute('aria-label', `${active.name}的分類`);
+      if (levelsAreRoot) {
+        addChip(el.levels, '全部', all.length, filter === 'all', () => {
+          filter = 'all';
+          render();
+        });
+      }
+      active.units.forEach((unit) => {
+        addChip(el.levels, levelName(unit), counts[unit], filter === unit, () => {
+          filter = unit;
+          render();
+        });
+      });
+    } else {
+      el.levels.removeAttribute('aria-label');
+    }
+
+    return { singlePractice };
   }
 
-  function renderItem(m) {
+  function categoryLabel(unit, singlePractice) {
+    const info = UNITS[unit];
+    if (!info) return unit;
+    const pickedUnit = filter !== 'all' && !groupById(filter);
+    if (pickedUnit) return '';
+    if (groupById(filter) || singlePractice) return info.level;
+    return `${groupName(info.group)}・${info.level}`;
+  }
+
+  function renderItem(m, singlePractice) {
     const li = document.createElement('li');
     li.className = 'review-item';
     li.innerHTML = `
@@ -66,10 +174,16 @@
     if (yours) yours.textContent = `你的答案：${m.answer}`;
 
     const meta = li.querySelector('.mistake-meta');
-    const parts = [];
-    if (filter === 'all') parts.push(unitName(m.unit));
-    parts.push(`錯 ${m.count} 次`, formatDate(m.lastAt));
-    meta.textContent = parts.join('・');
+    const label = categoryLabel(m.unit, singlePractice);
+    if (label) {
+      const cat = document.createElement('span');
+      cat.textContent = label;
+      meta.appendChild(cat);
+    }
+    const stat = document.createElement('span');
+    stat.className = 'mistake-stat';
+    stat.textContent = `錯 ${m.count} 次・${formatDate(m.lastAt)}`;
+    meta.appendChild(stat);
     if (m.fixedAt > m.lastAt) {
       const tag = document.createElement('span');
       tag.className = 'tag';
@@ -90,21 +204,22 @@
 
   function render() {
     const all = mistakes.list();
-    renderFilters(all);
-    const shown = filter === 'all' ? all : all.filter((m) => m.unit === filter);
+    const { singlePractice } = renderFilters(all);
+    const shown = all.filter((m) => inFilter(m.unit, filter));
 
     el.list.textContent = '';
-    shown.forEach((m) => el.list.appendChild(renderItem(m)));
+    shown.forEach((m) => el.list.appendChild(renderItem(m, singlePractice)));
     el.list.hidden = shown.length === 0;
     el.empty.hidden = shown.length > 0;
     el.footer.hidden = shown.length === 0;
-    el.clearBtn.textContent = filter === 'all' ? '清空錯題本' : `清空「${unitName(filter)}」的錯題`;
+    el.hint.hidden = !shown.some((m) => m.fixedAt > m.lastAt);
+    el.clearBtn.textContent = filter === 'all' ? '清空錯題本' : `清空${scopeText(filter)}`;
   }
 
   el.clearBtn.addEventListener('click', () => {
-    const scope = filter === 'all' ? '所有錯題' : `「${unitName(filter)}」的錯題`;
+    const scope = scopeText(filter);
     if (!window.confirm(`確定要清空${scope}嗎？`)) return;
-    mistakes.clear(filter === 'all' ? null : filter);
+    mistakes.clear(unitsInFilter(filter));
     render();
   });
 

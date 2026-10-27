@@ -4,15 +4,21 @@
   const AUDIO_BASE = 'https://static.kiantiong.com/sutiau/';
   const MISTAKES_KEY = 'lian-tailo:mistakes';
 
-  // 錯題本用來顯示單元名稱；新增單元時在這裡登記
+  // 錯題本的收納跟首頁標題同一套：先分練習，再分難度。新增單元時兩邊一起登記
+  const GROUPS = [
+    { id: 'tone', name: '標聲調', units: ['tone-1', 'tone-2'] },
+    { id: 'pitch', name: '選音值', units: ['pitch-1', 'pitch-2'] },
+    { id: 'spell', name: '練拼寫', units: ['spell-1', 'spell-2', 'spell-3'] },
+  ];
+
   const UNITS = {
-    'tone-1': { name: '畫出單音節聲調', short: '單音節聲調', href: 'tone-draw/' },
-    'tone-2': { name: '畫出雙音節聲調', short: '雙音節聲調', href: 'tone-draw-2/' },
-    'pitch-1': { name: '選單音節音值', short: '單音節音值', href: 'pitch-choice/' },
-    'pitch-2': { name: '選雙音節音值', short: '雙音節音值', href: 'pitch-choice-2/' },
-    'spell-1': { name: '選聲母／韻母', short: '選聲母／韻母', href: 'spell-part/' },
-    'spell-2': { name: '聲韻拼寫', short: '聲韻拼寫', href: 'spell-iv/' },
-    'spell-3': { name: '聲韻調拼寫', short: '聲韻調拼寫', href: 'spell-ivt/' },
+    'tone-1': { group: 'tone', level: '本調（單音節）', href: 'tone-draw/' },
+    'tone-2': { group: 'tone', level: '本調＋變調（雙音節）', href: 'tone-draw-2/' },
+    'pitch-1': { group: 'pitch', level: '本調（單音節）', href: 'pitch-choice/' },
+    'pitch-2': { group: 'pitch', level: '本調＋變調（雙音節）', href: 'pitch-choice-2/' },
+    'spell-1': { group: 'spell', level: '聲母／韻母', href: 'spell-part/' },
+    'spell-2': { group: 'spell', level: '聲母＋韻母', href: 'spell-iv/' },
+    'spell-3': { group: 'spell', level: '聲＋韻＋聲調', href: 'spell-ivt/' },
   };
 
   // 分組平均出題時，每組（聲調或變調規則）取詞頻最高的幾個當題庫；題庫檢查頁的「出題範圍」也依此計算
@@ -34,8 +40,22 @@
   // ---------- 練習設定（各單元通用） ----------
 
   const SETTINGS_KEY = 'lian-tailo:settings';
-  const SETTINGS_DEFAULT = { count: 10, showHanji: false };
+  const LEVEL_DEFAULT = { tone: '1', pitch: '1', spell: 'part' };
+  const LEVEL_OPTIONS = {
+    tone: ['1', '2'],
+    pitch: ['1', '2'],
+    spell: ['part', 'iv', 'ivt'],
+  };
+  const SETTINGS_DEFAULT = { count: 10, showHanji: false, level: LEVEL_DEFAULT };
   const COUNT_OPTIONS = [5, 10, 20, 30];
+
+  function normalizeLevel(raw) {
+    const level = Object.assign({}, LEVEL_DEFAULT, raw && typeof raw === 'object' ? raw : {});
+    Object.keys(LEVEL_DEFAULT).forEach((key) => {
+      if (!LEVEL_OPTIONS[key].includes(level[key])) level[key] = LEVEL_DEFAULT[key];
+    });
+    return level;
+  }
 
   const settings = {
     COUNT_OPTIONS,
@@ -45,13 +65,16 @@
         const s = Object.assign({}, SETTINGS_DEFAULT, saved);
         if (!COUNT_OPTIONS.includes(s.count)) s.count = SETTINGS_DEFAULT.count;
         s.showHanji = !!s.showHanji;
+        s.level = normalizeLevel(s.level);
         return s;
       } catch (e) {
-        return Object.assign({}, SETTINGS_DEFAULT);
+        return Object.assign({}, SETTINGS_DEFAULT, { level: Object.assign({}, LEVEL_DEFAULT) });
       }
     },
     set(patch) {
-      const next = Object.assign(settings.get(), patch);
+      const prev = settings.get();
+      const next = Object.assign({}, prev, patch);
+      if (patch && patch.level) next.level = normalizeLevel(Object.assign({}, prev.level, patch.level));
       try {
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
       } catch (e) { /* 私密瀏覽模式可能無法寫入 */ }
@@ -123,12 +146,13 @@
 
     clear(unit) {
       const db = readMistakes();
+      const units = unit == null ? null : (Array.isArray(unit) ? unit : [unit]);
       Object.keys(db.items).forEach((key) => {
-        if (!unit || db.items[key].unit === unit) delete db.items[key];
+        if (!units || units.includes(db.items[key].unit)) delete db.items[key];
       });
       writeMistakes(db);
     },
   };
 
-  window.LianTailo = Object.assign(window.LianTailo || {}, { UNITS, POOL_PER_GROUP, audioUrl, shuffle, mistakes, settings });
+  window.LianTailo = Object.assign(window.LianTailo || {}, { GROUPS, UNITS, POOL_PER_GROUP, audioUrl, shuffle, mistakes, settings });
 })();

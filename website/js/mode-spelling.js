@@ -79,6 +79,8 @@
     let choices = [];
     let lastChoice = -1;
     let display = null;
+    let reviewing = false;
+    const confirmable = kind === 'iv' || kind === 'ivt';
 
     const correctOf = (part) => (part === 'i' ? syl.i : part === 'r' ? syl.r : syl.t);
     const currentPart = () => steps[step];
@@ -128,13 +130,30 @@
           text = '?';
           cls = currentPart() === part ? 'is-active' : 'is-pending';
         }
+        const editable = !finished && confirmable && (part === 'i' || part === 'r') && answers[part] !== undefined;
         return `
-          <div class="spell-slot is-${part} ${cls}">
+          <button type="button" class="spell-slot is-${part} ${cls}${editable ? ' is-editable' : ''}" data-part="${part}"${editable ? '' : ' disabled'}>
             <span class="spell-text">${text}</span>
-            ${fix}
-            <span class="spell-label">${PART_NAME[part]}</span>
-          </div>`;
+            <span class="spell-meta">${fix}<span class="spell-label">${PART_NAME[part]}</span></span>
+          </button>`;
       }).join('');
+      display.querySelectorAll('.spell-slot.is-editable').forEach((btn) => {
+        btn.addEventListener('click', () => editPart(btn.dataset.part));
+      });
+    }
+
+    // 聲母、韻母已填時可點回去重選；從該步起的答案清掉，後面再依序選
+    function editPart(part) {
+      if (!confirmable || api.isAnswered()) return;
+      const idx = steps.indexOf(part);
+      if (idx < 0 || answers[part] === undefined) return;
+      for (let j = idx; j < steps.length; j++) delete answers[steps[j]];
+      reviewing = false;
+      step = idx;
+      lastChoice = -1;
+      renderDisplay(false);
+      renderChoices();
+      refresh();
     }
 
     function renderChoices() {
@@ -155,19 +174,37 @@
           btn.innerHTML = '<span class="choice-main"></span>';
           btn.querySelector('.choice-main').textContent = part === 'i' ? (value || '無聲母') : value;
         }
+        if (reviewing && value === answers[part]) btn.classList.add('is-picked');
         btn.addEventListener('click', () => choose(i));
         grid.appendChild(btn);
       });
     }
 
+    function enterReview(i) {
+      reviewing = true;
+      lastChoice = i;
+      renderDisplay(false);
+      [...api.el.choiceGrid.children].forEach((btn, n) => {
+        btn.classList.toggle('is-picked', n === i);
+      });
+      refresh();
+    }
+
     function choose(i) {
       if (api.isAnswered() || i < 0 || i >= choices.length) return;
+      if (reviewing) {
+        answers[steps[steps.length - 1]] = choices[i];
+        enterReview(i);
+        return;
+      }
       answers[currentPart()] = choices[i];
       step++;
       if (step < steps.length) {
         renderDisplay(false);
         renderChoices();
         refresh();
+      } else if (confirmable) {
+        enterReview(i);
       } else {
         lastChoice = i;
         api.submit('choice');
@@ -182,6 +219,7 @@
       step = 0;
       answers = {};
       lastChoice = -1;
+      reviewing = false;
 
       const stage = api.el.stage;
       stage.classList.add('is-spelling');
@@ -196,13 +234,20 @@
 
     function refresh() {
       if (api.isAnswered()) return;
+      if (reviewing) {
+        api.setStatus('確認拼法後按「確定」。點聲母或韻母可以回去改');
+        api.setSubmitEnabled(true);
+        return;
+      }
+      api.setSubmitEnabled(false);
       const name = PART_NAME[currentPart()];
       if (kind === 'part') api.setStatus(`聽音檔，選出缺少的${name}`);
       else api.setStatus(`第 ${step + 1} 步：選出${name}`);
     }
 
     function submit() {
-      if (step < steps.length) return null;
+      if (!reviewing && step < steps.length) return null;
+      if (confirmable && !reviewing) return null;
       const lastPart = steps[steps.length - 1];
       [...api.el.choiceGrid.children].forEach((btn, i) => {
         btn.disabled = true;
@@ -233,7 +278,7 @@
     return {
       top: 'listen',
       stage: 'choices',
-      actions: [],
+      actions: confirmable ? [{ action: 'submit', label: '確定', style: 'primary' }] : [],
       mount(shellApi) {
         api = shellApi;
         finals = options.finals || [];
