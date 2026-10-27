@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#efefef">
+  <title>題庫檢查｜練台羅</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235c8273'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='white' font-family='sans-serif'%3E%C3%A1%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="page-fit">
+  <div class="app">
+    <header class="topbar">
+      <a class="icon-btn" href="../" aria-label="回首頁">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+      </a>
+      <h1 class="topbar-title">題庫檢查・雙音節變調</h1>
+      <button class="icon-btn" id="helpBtn" type="button" aria-label="使用說明">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><path d="M12 17.2h.01"/></svg>
+      </button>
+    </header>
+
+    <div class="rv-filters">
+      <select id="rangeFilter" aria-label="範圍">
+        <option value="pool">出題範圍</option>
+        <option value="all">全部詞</option>
+      </select>
+      <select id="ruleFilter" aria-label="規則"></select>
+      <select id="statusFilter" aria-label="狀態">
+        <option value="">未檢查</option>
+        <option value="all">全部狀態</option>
+        <option value="ok">已確認</option>
+        <option value="edit">已修改</option>
+        <option value="exclude">已排除</option>
+      </select>
+    </div>
+
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="quiz-meta"><span id="positionText"></span><span id="summaryText"></span></div>
+
+    <section class="view" id="cardView">
+      <div class="rv-card card" id="card">
+        <div class="rv-card-top">
+          <span id="rankText"></span>
+          <span class="rv-badge" id="statusBadge" hidden></span>
+        </div>
+        <p class="rv-word"><span id="romanText"></span><span class="hanji" id="hanjiText"></span></p>
+        <div class="rv-graph-big" id="graph"></div>
+        <p class="rv-rule" id="ruleText"></p>
+        <div class="rv-card-bottom">
+          <button class="play-btn is-small" id="playBtn" type="button" aria-label="播放音檔">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+          </button>
+          <button class="rv-link" id="unmarkBtn" type="button" hidden>清除這筆的標記</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-ghost" id="excludeBtn" type="button">排除</button>
+        <button class="btn btn-outline" id="editBtn" type="button">修改</button>
+        <button class="btn btn-primary" id="okBtn" type="button">正確</button>
+      </div>
+      <div class="rv-nav">
+        <button class="rv-link" id="prevBtn" type="button">‹ 上一筆</button>
+        <button class="rv-link" id="skipBtn" type="button">略過 ›</button>
+      </div>
+    </section>
+
+    <section class="view" id="doneView" hidden>
+      <div class="result-hero">
+        <p class="empty-title" id="doneTitle">這一批都檢查完了</p>
+        <p class="empty-text" id="doneText"></p>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-primary btn-block" id="exportBtn2" type="button">匯出修正檔</button>
+        <button class="btn btn-ghost btn-block" id="restartBtn" type="button">從頭再看一次</button>
+      </div>
+    </section>
+
+    <div class="rv-footer">
+      <button class="rv-link" id="resetBtn" type="button">清除本機修改</button>
+      <button class="rv-link is-primary" id="exportBtn" type="button">匯出修正檔</button>
+    </div>
+  </div>
+
+  <!-- 修改前字變調 -->
+  <div class="sheet" id="editSheet" hidden>
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title" id="editTitle">前字實際的變調</h2>
+      <div class="rv-edit-grid" id="editGrid"></div>
+      <button class="btn btn-ghost btn-block rv-edit-cancel" id="editCancel" type="button">取消</button>
+    </div>
+  </div>
+
+  <!-- 使用說明 -->
+  <div class="sheet" id="helpSheet" hidden>
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title" id="helpTitle">題庫檢查</h2>
+      <p class="sheet-text">「選雙音節音值」的前字變調是依規則自動算出的。每筆會自動播放音檔，對照音值圖後：</p>
+      <p class="sheet-text"><strong>正確</strong>確認規則沒問題；<strong>修改</strong>選出前字實際的變調；<strong>排除</strong>不拿來出題。標記完會自動跳到下一筆。</p>
+      <p class="sheet-text">修改會先存在這台裝置。檢查完按「匯出修正檔」，把下載的檔案放到 <span class="roman">data/sandhi_overrides.csv</span>，再執行 <span class="roman">scripts/build_tone_data.py</span>，題庫就會更新。</p>
+      <p class="sheet-text">鍵盤：空白鍵重播、Enter 正確、E 修改、X 排除、← → 上一筆／略過。</p>
+    </div>
+  </div>
+
+  <script src="../data/sandhi-words.js"></script>
+  <script src="../js/common.js"></script>
+  <script src="../js/tones.js"></script>
+  <script src="review.js"></script>
+</body>
+</html>
