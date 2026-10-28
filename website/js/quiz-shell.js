@@ -4,13 +4,15 @@
 //   top: 'listen'（先聽音檔再作答）或 'prompt'（先看音節與漢字，作答後才播放）
 //   stage: 'svg'（畫在 SVG 上）或 'choices'（選擇題）
 //   actions: 作答按鈕 [{ action, label, style }]，action 為 clear / submit；選擇題可留空
-//   helpExtra: 說明面板額外內容（HTML，選填）
 //   mount(api)、render(item)、refresh()、clear()、onStroke(stroke)
 //   submit(action) → null（不能送出）或 { ok, verdict, meta, answer, expect, answerPitch, expectPitch }
 (function () {
   'use strict';
 
-  const { audioUrl, shuffle, mistakes, TONES, TONE_8_NOTE, miniPitchSvg, pitchCompare } = window.LianTailo;
+  const {
+    audioUrl, shuffle, mistakes, TONES, TONE_BY_NUMBER, TONE_8_NOTE, SANDHI_RULES,
+    miniPitchSvg, pitchCompare, sandhiChartSvg,
+  } = window.LianTailo;
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const MIN_STROKE = 14;
 
@@ -101,14 +103,33 @@
     <div class="sheet" id="helpSheet" hidden>
       <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
         <div class="sheet-handle"></div>
-        <h2 class="sheet-title" id="helpTitle">台語聲調</h2>
-        <div class="tone-table card" id="toneTable"></div>
-        <p class="sheet-text">
-          <strong>調符標在哪個字母？</strong>依序找：<span class="roman">a</span> → <span class="roman">oo</span>（標在第一個 <span class="roman">o</span>）、<span class="roman">o</span>、<span class="roman">e</span> → <span class="roman">i</span>、<span class="roman">u</span>（<span class="roman">iu</span>、<span class="roman">ui</span> 標在後面那個）→ 成音節的 <span class="roman">m</span>、<span class="roman">ng</span>（標在 <span class="roman">m</span>、<span class="roman">n</span>）。
-        </p>
-        <p class="sheet-text">第 1 調與第 4 調（<span class="roman">-p、-t、-k、-h</span> 結尾）不標調符。</p>
-        <p class="sheet-text"><strong>音值圖</strong>由上到下代表音高由高到低（五度標音的 5 到 1），結尾是圓圈的表示入聲短促收尾。${TONE_8_NOTE}。</p>
-        ${mode.helpExtra || ''}
+        <h2 class="sheet-title" id="helpTitle">聲調說明</h2>
+        <div class="segmented help-tabs" role="tablist" aria-label="聲調說明分頁">
+          <button type="button" role="tab" id="helpTabTone" aria-controls="helpPanelTone" aria-selected="true" class="is-active">聲調</button>
+          <button type="button" role="tab" id="helpTabMark" aria-controls="helpPanelMark" aria-selected="false">調符的位置</button>
+          <button type="button" role="tab" id="helpTabSandhi" aria-controls="helpPanelSandhi" aria-selected="false">變調規則</button>
+        </div>
+        <div id="helpPanelTone" role="tabpanel" aria-labelledby="helpTabTone">
+          <div class="tone-grid" id="toneTable"></div>
+          <p class="sheet-text">點例字可以聽本調。音值圖由上到下是音高由高到低（五度標音的 5 到 1），線尾的圓圈表示入聲短促收尾。${TONE_8_NOTE}。</p>
+        </div>
+        <div id="helpPanelMark" role="tabpanel" aria-labelledby="helpTabMark" hidden>
+          <p class="sheet-text">調符標在音節裡最優先的那個字母上，由前往後找，找到就停：</p>
+          <ol class="mark-order">
+            <li><span class="roman">a</span><span class="mark-ex">ka → ká</span></li>
+            <li><span><span class="roman">oo</span>、<span class="roman">o</span>、<span class="roman">e</span></span><span class="mark-ex">koo → kóo</span></li>
+            <li><span><span class="roman">i</span>、<span class="roman">u</span></span><span class="mark-ex">kiu → kiú、kui → kuí</span></li>
+            <li><span>成音節的 <span class="roman">m</span>、<span class="roman">ng</span></span><span class="mark-ex">m → ḿ、ng → ńg</span></li>
+          </ol>
+          <p class="sheet-text"><span class="roman">oo</span> 標在第一個 <span class="roman">o</span>。<span class="roman">iu</span>、<span class="roman">ui</span> 標在後面那個字母。<span class="roman">ng</span> 標在 <span class="roman">n</span>。</p>
+          <p class="sheet-text">第 1 調，以及第 4 調（<span class="roman">-p、-t、-k、-h</span> 結尾）不標調符。例如 <span class="roman">ka</span>、<span class="roman">kah</span>、<span class="roman">kak</span>。</p>
+        </div>
+        <div id="helpPanelSandhi" role="tabpanel" aria-labelledby="helpTabSandhi" hidden>
+          <div class="sandhi-chart-wrap card" id="sandhiChart"></div>
+          <p class="sheet-text">箭頭指向變調後的調。變調欄聽前字相同的雙音節詞，本調欄聽這個字單唸。</p>
+          <div class="sandhi-table card" id="sandhiTable"></div>
+          <p class="sheet-text">第五調變調漳腔 5→7、泉腔 5→3。第 4、8 調收 <span class="roman">-h</span> 會拉長變舒聲；收 <span class="roman">-p、-t、-k</span> 仍是短促，只分成高促、低促。後字維持本調。</p>
+        </div>
       </div>
     </div>`;
   }
@@ -124,7 +145,7 @@
     ['helpBtn', 'quizView', 'resultView', 'progressBar', 'progressText', 'scoreText', 'playBtn', 'stage',
       'status', 'answerPanel', 'answerVerdict', 'answerWord', 'answerMeta', 'drawActions', 'nextActions',
       'submitBtn', 'nextBtn', 'resultScore', 'resultText', 'reviewWrap', 'reviewList', 'againBtn',
-      'helpSheet', 'toneTable', 'promptRoman', 'promptHanji', 'hintHanji', 'choiceGrid'].forEach((id) => { el[id] = $(id); });
+      'helpSheet', 'toneTable', 'sandhiChart', 'sandhiTable', 'promptRoman', 'promptHanji', 'hintHanji', 'choiceGrid'].forEach((id) => { el[id] = $(id); });
     el.svg = $('stageSvg');
 
     const state = {
@@ -162,7 +183,7 @@
       if (!fileName) return;
       if (audioName !== fileName) {
         audioName = fileName;
-        audio.src = audioUrl(fileName);
+        audio.src = mediaUrl(fileName);
       }
       try { audio.currentTime = 0; } catch (e) { /* 尚未載入 metadata */ }
       const p = audio.play();
@@ -178,10 +199,15 @@
       }
     }
 
+    function mediaUrl(fileName) {
+      if (/^(https?:|\.\.|\/)/.test(fileName)) return fileName;
+      return audioUrl(fileName);
+    }
+
     function preload(fileName) {
       const a = new Audio();
       a.preload = 'auto';
-      a.src = audioUrl(fileName);
+      a.src = mediaUrl(fileName);
       state.preload = a;
     }
 
@@ -457,22 +483,90 @@
 
     // ---------- 說明面板 ----------
 
+    function pitchText(value) {
+      return String(value).replace(/0$/, '');
+    }
+
+    function toneLabel(tone) {
+      return `第 ${tone} 調`;
+    }
+
     function buildHelp() {
-      TONES.forEach((t) => {
-        const row = document.createElement('button');
-        row.type = 'button';
-        row.className = 'tone-row';
+      const toneByNumber = {};
+      TONES.forEach((t) => { toneByNumber[t.tone] = t; });
+      [1, 2, 3, 4, 5, 6, 7, 8].forEach((n) => {
+        const t = toneByNumber[n];
+        if (!t) {
+          const gap = document.createElement('div');
+          gap.className = 'tone-cell-gap';
+          gap.setAttribute('aria-hidden', 'true');
+          el.toneTable.appendChild(gap);
+          return;
+        }
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = 'tone-cell';
+        cell.innerHTML = `
+          <span class="tone-cell-no">${t.tone}</span>
+          <span class="tone-cell-name">${t.name}</span>
+          <span class="tone-cell-word"><b></b> <span class="roman"></span></span>
+          ${miniPitchSvg(t.pitch)}
+          <span class="tone-cell-value">${pitchText(t.pitch)}</span>`;
+        cell.querySelector('b').textContent = t.hanji;
+        cell.querySelector('.roman').textContent = t.s;
+        cell.setAttribute('aria-label', `聽第 ${t.tone} 調，${t.hanji}，${t.s}`);
+        cell.addEventListener('click', () => play(t.a));
+        el.toneTable.appendChild(cell);
+      });
+
+      el.sandhiChart.innerHTML = sandhiChartSvg();
+      SANDHI_RULES.forEach((r) => {
+        const base = r.base || Number(r.from);
+        const citation = TONE_BY_NUMBER[base].pitch;
+        const changedName = /^\d+$/.test(String(r.to)) ? toneLabel(r.to) : r.to;
+        const row = document.createElement('div');
+        row.className = 'sandhi-row';
+        const sandhiPlay = r.wa
+          ? `<button type="button" class="sandhi-play" data-audio="sandhi">${r.word}</button>`
+          : '<span class="sandhi-missing">無這腔音檔</span>';
         row.innerHTML = `
-          <span class="tone-name">第 ${t.tone} 調<small>${t.name}</small></span>
-          <span class="tone-example-hanji"></span>
-          <span class="tone-example"></span>
-          <span class="tone-symbol"></span>
-          <span class="tone-pitch">${miniPitchSvg(t.pitch)}</span>`;
-        row.querySelector('.tone-example-hanji').textContent = t.hanji;
-        row.querySelector('.tone-example').textContent = t.s;
-        row.querySelector('.tone-symbol').textContent = t.mark;
-        row.addEventListener('click', () => play(t.a));
-        el.toneTable.appendChild(row);
+          <div class="sandhi-word">
+            <strong></strong>
+            <span class="roman"></span>
+            <small>${toneLabel(base)}${r.note ? `・${r.note}` : ''}</small>
+          </div>
+          <div class="sandhi-pitch is-changed">
+            <small>變調・${changedName}</small>
+            ${miniPitchSvg(r.pitch)}
+            <b>${pitchText(r.pitch)}</b>
+            ${sandhiPlay}
+          </div>
+          <div class="sandhi-pitch">
+            <small>本調・${toneLabel(base)}</small>
+            ${miniPitchSvg(citation)}
+            <b>${pitchText(citation)}</b>
+            <button type="button" class="sandhi-play" data-audio="base"></button>
+          </div>`;
+        row.querySelector('strong').textContent = r.word;
+        row.querySelector('.roman').textContent = r.ws;
+        row.querySelector('[data-audio="base"]').textContent = r.hanji;
+        const sandhiBtn = row.querySelector('[data-audio="sandhi"]');
+        if (sandhiBtn) sandhiBtn.addEventListener('click', () => play(r.wa));
+        row.querySelector('[data-audio="base"]').addEventListener('click', () => play(r.a));
+        el.sandhiTable.appendChild(row);
+      });
+
+      const tabs = [...el.helpSheet.querySelectorAll('[role="tab"]')];
+      const panels = [...el.helpSheet.querySelectorAll('[role="tabpanel"]')];
+      tabs.forEach((tab, i) => {
+        tab.addEventListener('click', () => {
+          tabs.forEach((t, j) => {
+            const on = j === i;
+            t.classList.toggle('is-active', on);
+            t.setAttribute('aria-selected', String(on));
+            panels[j].hidden = !on;
+          });
+        });
       });
     }
 

@@ -46,7 +46,7 @@
     pitch: ['1', '2'],
     spell: ['part', 'iv', 'ivt'],
   };
-  const SETTINGS_DEFAULT = { count: 10, showHanji: false, level: LEVEL_DEFAULT };
+  const SETTINGS_DEFAULT = { count: 10, showHanji: true, level: LEVEL_DEFAULT };
   const COUNT_OPTIONS = [5, 10, 20, 30];
 
   function normalizeLevel(raw) {

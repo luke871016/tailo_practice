@@ -104,7 +104,24 @@
           </div>
           <input class="switch" type="checkbox" id="hanjiSetting" role="switch">
         </label>
+        <button class="setting-row" id="installBtn" type="button">
+          <div class="setting-text">
+            <p class="setting-name">安裝到主畫面</p>
+            <p class="setting-desc" id="installDesc">加到手機主畫面，像 App 一樣打開</p>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
+        </button>
       </div>
+    </div>
+  </div>
+
+  <div class="sheet" id="installSheet" hidden>
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="installTitle">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title" id="installTitle">安裝到主畫面</h2>
+      <p class="sheet-text install-lead" id="installLead">加到主畫面後，不用再開瀏覽器就能練習。</p>
+      <ol class="install-steps" id="installSteps"></ol>
+      <button class="btn btn-primary btn-block" id="installAction" type="button">知道了</button>
     </div>
   </div>
 
@@ -203,6 +220,105 @@
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !settingsSheet.hidden) closeSettings();
       });
+
+      const INSTALL_SEEN_KEY = 'lian-tailo:install-hint';
+      const installBtn = document.getElementById('installBtn');
+      const installDesc = document.getElementById('installDesc');
+      const installSheet = document.getElementById('installSheet');
+      const installSteps = document.getElementById('installSteps');
+      const installLead = document.getElementById('installLead');
+      const installAction = document.getElementById('installAction');
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+      const ios = /iphone|ipad|ipod/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const mobile = ios || /android|mobile/i.test(navigator.userAgent)
+        || (window.matchMedia('(max-width: 820px)').matches && window.matchMedia('(pointer: coarse)').matches);
+      let deferredInstall = null;
+
+      const INSTALL_COPY = ios ? {
+        lead: '用 Safari 打開這個網頁，照下面三步加到主畫面。',
+        steps: ['點畫面底部的分享按鈕', '往下滑，選「加入主畫面」', '按右上角的「加入」'],
+      } : {
+        lead: '用 Chrome 或系統瀏覽器打開，照下面步驟加到主畫面。',
+        steps: ['點瀏覽器右上角的選單', '選「加到主畫面」或「安裝應用程式」', '確認名稱後按「安裝」或「新增」'],
+      };
+
+      function markInstallSeen() {
+        try { localStorage.setItem(INSTALL_SEEN_KEY, '1'); } catch (e) { /* 私密瀏覽 */ }
+      }
+
+      function fillInstallSteps() {
+        installLead.textContent = deferredInstall
+          ? '可以把它加到主畫面，之後不用再開瀏覽器。'
+          : INSTALL_COPY.lead;
+        installSteps.hidden = !!deferredInstall;
+        installSteps.textContent = '';
+        if (!deferredInstall) {
+          INSTALL_COPY.steps.forEach((text, i) => {
+            const li = document.createElement('li');
+            const num = document.createElement('span');
+            num.className = 'install-step-num';
+            num.textContent = String(i + 1);
+            const body = document.createElement('span');
+            body.textContent = text;
+            li.append(num, body);
+            installSteps.appendChild(li);
+          });
+        }
+        installAction.textContent = deferredInstall ? '安裝' : '知道了';
+      }
+
+      function openInstall(fromHint) {
+        fillInstallSteps();
+        installSheet.hidden = false;
+        installSheet.dataset.fromHint = fromHint ? '1' : '';
+        if (fromHint) markInstallSeen();
+      }
+
+      function closeInstall() {
+        installSheet.hidden = true;
+      }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstall = e;
+        installDesc.textContent = '加到主畫面，像 App 一樣打開';
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredInstall = null;
+        installBtn.hidden = true;
+        closeInstall();
+      });
+
+      installBtn.addEventListener('click', () => {
+        closeSettings();
+        openInstall(false);
+      });
+      installAction.addEventListener('click', async () => {
+        if (!deferredInstall) {
+          closeInstall();
+          return;
+        }
+        deferredInstall.prompt();
+        try { await deferredInstall.userChoice; } catch (e) { /* 使用者取消 */ }
+        deferredInstall = null;
+        closeInstall();
+      });
+      installSheet.addEventListener('click', (e) => {
+        if (e.target === installSheet) closeInstall();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !installSheet.hidden) closeInstall();
+      });
+
+      if (standalone) {
+        installBtn.hidden = true;
+      } else if (mobile) {
+        let seen = false;
+        try { seen = localStorage.getItem(INSTALL_SEEN_KEY) === '1'; } catch (e) { seen = true; }
+        if (!seen) window.setTimeout(() => openInstall(true), 600);
+      }
 
       function render() {
         applyLevels();

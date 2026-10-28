@@ -64,21 +64,6 @@
     return `${from} → ${PITCH_NAME[item.sd] || item.sd}`;
   }
 
-  function helpExtra() {
-    const rows = window.LianTailo.SANDHI_RULES.map((r) => `
-      <div class="sandhi-row">
-        <span class="sandhi-from">${r.from}</span>
-        ${window.LianTailo.miniPitchSvg(citation(r.base || Number(r.from)))}
-        <span class="sandhi-arrow">→</span>
-        ${window.LianTailo.miniPitchSvg(r.pitch)}
-        <span class="sandhi-to">${r.to}${r.note ? `<small>${r.note}</small>` : ''}</span>
-      </div>`).join('');
-    return `
-      <h3 class="sheet-subtitle">前字變調</h3>
-      <div class="sandhi-table card">${rows}</div>
-      <p class="sheet-text">${SANDHI_5_NOTE}。第 4、8 調依結尾分成 <span class="roman">-h</span> 與 <span class="roman">-p、-t、-k</span> 兩種。後字維持本調。</p>`;
-  }
-
   function create(options) {
     const kind = (options && options.kind) || 'single';
     let api = null;
@@ -171,7 +156,6 @@
       top: 'prompt',
       stage: 'choices',
       actions: [],
-      helpExtra: kind === 'sandhi' ? helpExtra() : '',
       mount(shellApi) { api = shellApi; },
       render,
       refresh,

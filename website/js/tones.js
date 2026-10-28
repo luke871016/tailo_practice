@@ -21,17 +21,18 @@
   TONES.forEach((t) => { TONE_BY_NUMBER[t.tone] = t; });
 
   // 前字變調規則（說明面板用；實際題目的變調音值由建置腳本算好，可人工修正）
+  // a 是前字單音節本調音檔，wa 是雙音節變調音檔。泉腔紅茶用站內音檔。
   const SANDHI_RULES = [
-    { from: '1', to: '7', pitch: '33' },
-    { from: '2', to: '1', pitch: '55' },
-    { from: '3', to: '2', pitch: '53' },
-    { from: '4h', to: '2', pitch: '53', base: 4 },
-    { from: '4ptk', to: '高促', pitch: '550', base: 4 },
-    { from: '5', to: '7', pitch: '33', note: '漳' },
-    { from: '5', to: '3', pitch: '11', note: '泉' },
-    { from: '7', to: '3', pitch: '11' },
-    { from: '8h', to: '3', pitch: '11', base: 8 },
-    { from: '8ptk', to: '低促', pitch: '110', base: 8 },
+    { from: '1', to: '7', pitch: '33', hanji: '心', s: 'sim', a: '792(1)', word: '心肝', ws: 'sim-kuann', wa: '934(1)' },
+    { from: '2', to: '1', pitch: '55', hanji: '等', s: 'tán', a: '8817(1)', word: '等待', ws: 'tán-thāi', wa: '8858(1)' },
+    { from: '3', to: '2', pitch: '53', hanji: '愛', s: 'ài', a: '9427(1)', word: '愛情', ws: 'ài-tsîng', wa: '9452(1)' },
+    { from: '4h', to: '2', pitch: '53', base: 4, note: '-h', hanji: '拍', s: 'phah', a: '3956(1)', word: '拍拚', ws: 'phah-piànn', wa: '4035(1)' },
+    { from: '4ptk', to: '高促', pitch: '550', base: 4, note: '非 -h', hanji: '國', s: 'kok', a: '7071(1)', word: '國家', ws: 'kok-ka', wa: '22125(1)' },
+    { from: '5', to: '7', pitch: '33', note: '漳', hanji: '紅', s: 'âng', a: '5365(1)', word: '紅茶', ws: 'âng-tê', wa: '5409(1)' },
+    { from: '5', to: '3', pitch: '11', note: '泉', hanji: '紅', s: 'âng', a: '5365(1)', word: '紅茶', ws: 'âng-tê', wa: '../audio/ang-te-tshuan.wav' },
+    { from: '7', to: '3', pitch: '11', hanji: '想', s: 'siūnn', a: '9422(1)', word: '想欲', ws: 'siūnn-beh', wa: '14370(1)' },
+    { from: '8h', to: '3', pitch: '11', base: 8, note: '-h', hanji: '月', s: 'gue̍h', a: '803(1)', word: '月娘', ws: 'gue̍h-niû', wa: '1012(1)' },
+    { from: '8ptk', to: '低促', pitch: '110', base: 8, note: '非 -h', hanji: '日', s: 'ji̍t', a: '801(1)', word: '日子', ws: 'ji̍t-tsí', wa: '828(1)' },
   ];
 
   // 音值對應的調名（變調後的音值也以調名稱呼，例如 1 → 7）
@@ -146,6 +147,45 @@
       </div>`;
   }
 
+  // 變調記憶圖。四個舒聲調放在同一個圓上，弧線彼此對稱；4、8 與 2、3 同高
+  function sandhiChartSvg() {
+    const num = (x, y, t) => `<text class="sandhi-chart-num" x="${x}" y="${y}">${t}</text>`;
+    const arc = (d) => `<path class="sandhi-chart-arrow" d="${d}"/>`;
+    const label = (x, y, t) => `<text class="sandhi-chart-label" x="${x}" y="${y}">${t}</text>`;
+    return `<svg class="sandhi-chart" viewBox="0 0 372 196" role="img" aria-label="變調記憶圖。循環是 1 變 7、7 變 3、3 變 2、2 變 1。第 5 調漳腔變 7、泉腔變 3。第 4 調收 -h 變 2，否則變高促。第 8 調收 -h 變 3，否則變低促。">
+      <defs>
+        <marker id="sandhiHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0 0.6 L9.2 5 L0 9.4 Z" fill="#2b312e"/>
+        </marker>
+      </defs>
+      ${arc('M76 52 H153')}
+      ${arc('M164 64 V141')}
+      ${arc('M153 152 H75')}
+      ${arc('M64 140 V64')}
+      ${arc('M102.2 96.4 L73.8 63.4')}
+      ${arc('M125.8 96.4 L154.2 63.4')}
+      ${arc('M238 52 H176')}
+      ${arc('M262 52 H312')}
+      ${arc('M238 152 H176')}
+      ${arc('M262 152 H312')}
+      ${num(64, 52, '7')}
+      ${num(164, 52, '3')}
+      ${num(164, 152, '2')}
+      ${num(64, 152, '1')}
+      ${num(114, 110, '5')}
+      ${num(250, 52, '8')}
+      ${num(250, 152, '4')}
+      ${label(86, 108, '漳')}
+      ${label(142, 108, '泉')}
+      ${label(207, 36, '-h')}
+      ${label(207, 170, '-h')}
+      ${label(290, 36, '非 -h')}
+      ${label(290, 136, '非 -h')}
+      ${label(338, 52, '低促')}
+      ${label(338, 152, '高促')}
+    </svg>`;
+  }
+
   // 說明面板用的小音值圖
   function miniPitchSvg(pitch) {
     const geo = { top: 4, gap: 7, x0: 4, x1: 52, shortRatio: 0.5 };
@@ -158,7 +198,7 @@
   }
 
   window.LianTailo = Object.assign(window.LianTailo || {}, {
-    TONES, TONE_BY_NUMBER, SANDHI_RULES, PITCH_NAME, TONE_8_NOTE, SANDHI_5_NOTE,
+    TONES, TONE_BY_NUMBER, SANDHI_RULES, PITCH_NAME, TONE_8_NOTE, SANDHI_5_NOTE, sandhiChartSvg,
     markIndexFor, withTone, parsePitch, acceptedPitches, contourShape, contourMarkup, pitchSvg, pitchCompare, miniPitchSvg,
   });
 })();
