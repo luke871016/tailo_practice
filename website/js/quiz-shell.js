@@ -100,28 +100,50 @@
       </section>
     </div>
 
-    <div class="sheet" id="helpSheet" hidden>
-      <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
-        <div class="sheet-handle"></div>
-        <h2 class="sheet-title" id="helpTitle">聲調說明</h2>
+    <div class="help-screen" id="helpSheet" hidden>
+      <div class="help-frame" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+        <header class="topbar">
+          <span class="icon-btn" aria-hidden="true"></span>
+          <h2 class="topbar-title" id="helpTitle">聲調說明</h2>
+          <button class="icon-btn" id="helpClose" type="button" aria-label="返回">${ICON_BACK}</button>
+        </header>
         <div class="segmented help-tabs" role="tablist" aria-label="聲調說明分頁">
           <button type="button" role="tab" id="helpTabTone" aria-controls="helpPanelTone" aria-selected="true" class="is-active">聲調</button>
           <button type="button" role="tab" id="helpTabMark" aria-controls="helpPanelMark" aria-selected="false">調符的位置</button>
           <button type="button" role="tab" id="helpTabSandhi" aria-controls="helpPanelSandhi" aria-selected="false">變調規則</button>
         </div>
+        <div class="help-body">
         <div id="helpPanelTone" role="tabpanel" aria-labelledby="helpTabTone">
           <div class="tone-grid" id="toneTable"></div>
           <p class="sheet-text">點例字可以聽本調。音值圖由上到下是音高由高到低（五度標音的 5 到 1），線尾的圓圈表示入聲短促收尾。${TONE_8_NOTE}。</p>
         </div>
         <div id="helpPanelMark" role="tabpanel" aria-labelledby="helpTabMark" hidden>
-          <p class="sheet-text">調符標在音節裡最優先的那個字母上，由前往後找，找到就停：</p>
-          <ol class="mark-order">
-            <li><span class="roman">a</span><span class="mark-ex">ka → ká</span></li>
-            <li><span><span class="roman">oo</span>、<span class="roman">o</span>、<span class="roman">e</span></span><span class="mark-ex">koo → kóo</span></li>
-            <li><span><span class="roman">i</span>、<span class="roman">u</span></span><span class="mark-ex">kiu → kiú、kui → kuí</span></li>
-            <li><span>成音節的 <span class="roman">m</span>、<span class="roman">ng</span></span><span class="mark-ex">m → ḿ、ng → ńg</span></li>
-          </ol>
-          <p class="sheet-text"><span class="roman">oo</span> 標在第一個 <span class="roman">o</span>。<span class="roman">iu</span>、<span class="roman">ui</span> 標在後面那個字母。<span class="roman">ng</span> 標在 <span class="roman">n</span>。</p>
+          <section class="mark-block">
+            <h3>oo、ng 標在前面的字母</h3>
+            <p class="sheet-text"><span class="roman">oo</span> 標在第一個 <span class="roman">o</span>，<span class="roman">ng</span> 標在 <span class="roman">n</span>。成音節的 <span class="roman">m</span> 只有一個字母，調符標在 <span class="roman">m</span>。</p>
+            <ul class="mark-order">
+              <li><span class="roman">oo</span><span class="mark-ex">koo → kóo</span></li>
+              <li><span class="roman">ng</span><span class="mark-ex">ng → ńg</span></li>
+              <li><span class="roman">m</span><span class="mark-ex">m → ḿ</span></li>
+            </ul>
+          </section>
+          <section class="mark-block">
+            <h3>複元音標在主要元音</h3>
+            <p class="sheet-text">主要元音是響度較大、嘴型較開的那個。有 <span class="roman">a</span> 就標 <span class="roman">a</span>；沒有就標 <span class="roman">o</span> 或 <span class="roman">e</span>；再沒有才標 <span class="roman">i</span> 或 <span class="roman">u</span>。</p>
+            <ol class="mark-order">
+              <li><span class="mark-key roman">a</span><span class="mark-ex">ai → ái、au → áu、ia → iá、ua → uá、iau → iáu</span></li>
+              <li><span class="mark-key"><span class="roman">o</span>、<span class="roman">e</span></span><span class="mark-ex">io → ió、ue → ué</span></li>
+              <li><span class="mark-key"><span class="roman">i</span>、<span class="roman">u</span></span><span class="mark-ex">ki → kí、ku → kú</span></li>
+            </ol>
+          </section>
+          <section class="mark-block">
+            <h3>iu、ui 標在後面的字母</h3>
+            <p class="sheet-text"><span class="roman">iu</span> 和 <span class="roman">ui</span> ，調符標在後面那個字母。</p>
+            <ul class="mark-order">
+              <li><span class="roman">iu</span><span class="mark-ex">kiu → kiú</span></li>
+              <li><span class="roman">ui</span><span class="mark-ex">kui → kuí</span></li>
+            </ul>
+          </section>
           <p class="sheet-text">第 1 調，以及第 4 調（<span class="roman">-p、-t、-k、-h</span> 結尾）不標調符。例如 <span class="roman">ka</span>、<span class="roman">kah</span>、<span class="roman">kak</span>。</p>
         </div>
         <div id="helpPanelSandhi" role="tabpanel" aria-labelledby="helpTabSandhi" hidden>
@@ -129,6 +151,7 @@
           <p class="sheet-text">箭頭指向變調後的調。變調欄聽前字相同的雙音節詞，本調欄聽這個字單唸。</p>
           <div class="sandhi-table card" id="sandhiTable"></div>
           <p class="sheet-text">第五調變調漳腔 5→7、泉腔 5→3。第 4、8 調收 <span class="roman">-h</span> 會拉長變舒聲；收 <span class="roman">-p、-t、-k</span> 仍是短促，只分成高促、低促。後字維持本調。</p>
+        </div>
         </div>
       </div>
     </div>`;
@@ -145,7 +168,7 @@
     ['helpBtn', 'quizView', 'resultView', 'progressBar', 'progressText', 'scoreText', 'playBtn', 'stage',
       'status', 'answerPanel', 'answerVerdict', 'answerWord', 'answerMeta', 'drawActions', 'nextActions',
       'submitBtn', 'nextBtn', 'resultScore', 'resultText', 'reviewWrap', 'reviewList', 'againBtn',
-      'helpSheet', 'toneTable', 'sandhiChart', 'sandhiTable', 'promptRoman', 'promptHanji', 'hintHanji', 'choiceGrid'].forEach((id) => { el[id] = $(id); });
+      'helpSheet', 'helpClose', 'toneTable', 'sandhiChart', 'sandhiTable', 'promptRoman', 'promptHanji', 'hintHanji', 'choiceGrid'].forEach((id) => { el[id] = $(id); });
     el.svg = $('stageSvg');
 
     const state = {
@@ -617,7 +640,7 @@
     el.nextBtn.addEventListener('click', nextQuestion);
     el.againBtn.addEventListener('click', startSession);
     el.helpBtn.addEventListener('click', openHelp);
-    el.helpSheet.addEventListener('click', (e) => { if (e.target === el.helpSheet) closeHelp(); });
+    el.helpClose.addEventListener('click', closeHelp);
 
     document.addEventListener('keydown', (e) => {
       if (!el.helpSheet.hidden) {

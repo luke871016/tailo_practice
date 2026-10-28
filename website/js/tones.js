@@ -154,20 +154,20 @@
     const label = (x, y, t) => `<text class="sandhi-chart-label" x="${x}" y="${y}">${t}</text>`;
     return `<svg class="sandhi-chart" viewBox="0 0 372 196" role="img" aria-label="變調記憶圖。循環是 1 變 7、7 變 3、3 變 2、2 變 1。第 5 調漳腔變 7、泉腔變 3。第 4 調收 -h 變 2，否則變高促。第 8 調收 -h 變 3，否則變低促。">
       <defs>
-        <marker id="sandhiHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M0 0.6 L9.2 5 L0 9.4 Z" fill="#2b312e"/>
+        <marker id="sandhiHead" markerUnits="userSpaceOnUse" viewBox="0 0 12 12" refX="0" refY="6" markerWidth="11" markerHeight="11" orient="auto">
+          <path d="M0 1.2 L11 6 L0 10.8 Z" fill="#2b312e"/>
         </marker>
       </defs>
-      ${arc('M76 52 H153')}
-      ${arc('M164 64 V141')}
-      ${arc('M153 152 H75')}
-      ${arc('M64 140 V64')}
-      ${arc('M102.2 96.4 L73.8 63.4')}
-      ${arc('M125.8 96.4 L154.2 63.4')}
-      ${arc('M238 52 H176')}
-      ${arc('M262 52 H312')}
-      ${arc('M238 152 H176')}
-      ${arc('M262 152 H312')}
+      ${arc('M86 52 H142')}
+      ${arc('M164 74 V129')}
+      ${arc('M142 152 H87')}
+      ${arc('M64 130 V74')}
+      ${arc('M102.2 96.4 L80.3 70.9')}
+      ${arc('M125.8 96.4 L147.7 70.9')}
+      ${arc('M228 52 H186')}
+      ${arc('M272 52 H312')}
+      ${arc('M228 152 H187')}
+      ${arc('M272 152 H312')}
       ${num(64, 52, '7')}
       ${num(164, 52, '3')}
       ${num(164, 152, '2')}

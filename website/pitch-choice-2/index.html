@@ -10,6 +10,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <script>
+    if ('serviceWorker' in navigator) {
+      var css = document.querySelector('link[rel="stylesheet"][href*="style.css"]');
+      var root = css ? css.getAttribute('href').replace(/css\/style\.css(?:\?.*)?$/, '') : './';
+      navigator.serviceWorker.register(root + 'sw.js');
+    }
+  </script>
+
 </head>
 <body class="page-fit">
   <script src="../data/sandhi-words.js"></script>

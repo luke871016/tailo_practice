@@ -9,7 +9,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=5">
+  <link rel="stylesheet" href="../css/style.css">
+  <script>
+    if ('serviceWorker' in navigator) {
+      var css = document.querySelector('link[rel="stylesheet"][href*="style.css"]');
+      var root = css ? css.getAttribute('href').replace(/css\/style\.css(?:\?.*)?$/, '') : './';
+      navigator.serviceWorker.register(root + 'sw.js');
+    }
+  </script>
+
 </head>
 <body>
   <div class="app">
@@ -39,8 +47,8 @@
     </div>
   </div>
 
-  <script src="../js/common.js?v=3"></script>
+  <script src="../js/common.js"></script>
   <script src="../js/tones.js"></script>
-  <script src="mistakes.js?v=4"></script>
+  <script src="mistakes.js"></script>
 </body>
 </html>

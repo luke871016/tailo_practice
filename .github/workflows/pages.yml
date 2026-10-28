@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Stamp asset versions
+        run: python3 .github/stamp-assets.py "$GITHUB_SHA"
       - uses: actions/configure-pages@v5
         with:
           enablement: true
