@@ -8,6 +8,7 @@
 - website/data/tone-syllables.js：單音節
 - website/data/tone-words.js：雙音節（以連字符相連的詞目，排除輕聲與「仔」尾）
 - website/data/sandhi-words.js：雙音節加上前字變調，並套用 data/sandhi_overrides.csv 的人工檢查結果
+  （選雙音節音值、畫雙音節調符都用這份；排除項帶 x，兩種練習都不出題）
 """
 
 import csv

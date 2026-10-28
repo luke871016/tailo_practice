@@ -12,14 +12,20 @@
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="page-fit">
-  <script src="../data/tone-words.js"></script>
+  <script src="../data/sandhi-words.js"></script>
   <script src="../js/common.js"></script>
   <script src="../js/tones.js"></script>
   <script src="../js/quiz-shell.js"></script>
   <script src="../js/mode-tone-mark.js"></script>
   <script>
     QuizShell.create(
-      { unit: 'tone-2', title: '畫出雙音節聲調', data: window.TONE_WORDS },
+      {
+        unit: 'tone-2',
+        title: '畫出雙音節聲調',
+        data: window.SANDHI_WORDS.filter((d) => !d.x),
+        groupBy: (d) => d.rule,
+        poolPerGroup: LianTailo.POOL_PER_GROUP.sandhiRule,
+      },
       ToneMarkMode.create()
     );
   </script>
