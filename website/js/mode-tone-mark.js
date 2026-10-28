@@ -13,9 +13,6 @@
   const SINGLE_HEIGHT = 268;
   const ROW_BASELINE = 180;
   const ROW_HEIGHT = 240;
-  const STACK_TOP = 175;
-  const STACK_STEP = 185;
-  const STACK_BOTTOM = 55;
   const MIN_STROKE = 14;
   const MAX_PAIR_DISTANCE = 70;
 
@@ -149,11 +146,7 @@
     let syls = [];
     let markLayer = null;
 
-    function layoutSize(kind, hyphenWidth) {
-      if (kind === 'stack') {
-        const content = Math.max(...syls.map((s) => s.width));
-        return { content, w: Math.max(400, content + PAD_X * 2), h: STACK_TOP + (syls.length - 1) * STACK_STEP + STACK_BOTTOM };
-      }
+    function layoutSize(hyphenWidth) {
       const content = syls.reduce((sum, s) => sum + s.width, 0) + (syls.length - 1) * (SYLLABLE_GAP * 2 + hyphenWidth);
       return { content, w: Math.max(460, content + PAD_X * 2), h: syls.length > 1 ? ROW_HEIGHT : SINGLE_HEIGHT };
     }
@@ -190,18 +183,8 @@
       });
       probe.remove();
 
-      // 多音節時比較並排與上下疊放，選字比較大的排法
-      let kind = 'row';
-      let size = layoutSize('row', hyphenWidth);
-      if (syls.length > 1) {
-        const stack = layoutSize('stack', hyphenWidth);
-        const box = api.el.stage.getBoundingClientRect();
-        const fit = (s) => Math.min(box.width / s.w, box.height / s.h);
-        if (box.height > 0 && fit(stack) > fit(size) * 1.15) {
-          kind = 'stack';
-          size = stack;
-        }
-      }
+      // 多音節一律橫排並保留連字號；字太長時由 viewBox 縮小塞進畫布
+      const size = layoutSize(hyphenWidth);
       svg.setAttribute('viewBox', `0 0 ${size.w} ${size.h}`);
 
       const place = (s, offsetX, baseline) => {
@@ -216,22 +199,18 @@
         });
       };
 
-      if (kind === 'stack') {
-        syls.forEach((s, k) => place(s, (size.w - s.width) / 2, STACK_TOP + k * STACK_STEP));
-      } else {
-        const baseline = syls.length > 1 ? ROW_BASELINE : SINGLE_BASELINE;
-        let cursor = (size.w - size.content) / 2;
-        syls.forEach((s, k) => {
-          place(s, cursor, baseline);
-          cursor += s.width;
-          if (k < syls.length - 1) {
-            const hyphen = svgEl('text', { class: 'stage-letter stage-hyphen', x: cursor + SYLLABLE_GAP, y: baseline });
-            hyphen.textContent = '-';
-            svg.appendChild(hyphen);
-            cursor += SYLLABLE_GAP * 2 + hyphenWidth;
-          }
-        });
-      }
+      const baseline = syls.length > 1 ? ROW_BASELINE : SINGLE_BASELINE;
+      let cursor = (size.w - size.content) / 2;
+      syls.forEach((s, k) => {
+        place(s, cursor, baseline);
+        cursor += s.width;
+        if (k < syls.length - 1) {
+          const hyphen = svgEl('text', { class: 'stage-letter stage-hyphen', x: cursor + SYLLABLE_GAP, y: baseline });
+          hyphen.textContent = '-';
+          svg.appendChild(hyphen);
+          cursor += SYLLABLE_GAP * 2 + hyphenWidth;
+        }
+      });
 
       // 單音節才標聲母、韻母
       if (syls.length === 1) {

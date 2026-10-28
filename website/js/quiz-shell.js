@@ -197,11 +197,33 @@
 
     // ---------- 出題 ----------
 
+    // 本單元答錯過、之後還沒答對的題目。錯題本只存音檔檔名，題目內容從題庫補回
+    function unreviewedItems() {
+      const byAudio = new Map();
+      DATA.forEach((d) => {
+        if (!byAudio.has(d.a)) byAudio.set(d.a, d);
+      });
+      const seen = new Set();
+      const items = [];
+      mistakes.list().forEach((m) => {
+        if (m.unit !== config.unit || m.fixedAt) return;
+        const item = byAudio.get(m.a);
+        if (!item || seen.has(m.a)) return;
+        seen.add(m.a);
+        items.push(item);
+      });
+      return items;
+    }
+
     // 有 groupBy 時各組（聲調、變調規則）各取詞頻前 poolPerGroup 個，再輪流從各組抽題，讓每組出現的機會平均
-    function pickItems() {
-      if (!config.groupBy) return shuffle(DATA.slice(0, config.poolSize)).slice(0, config.count);
+    function pickFresh(n, skip) {
+      if (n <= 0) return [];
+      if (!config.groupBy) {
+        return shuffle(DATA.slice(0, config.poolSize).filter((d) => !skip.has(d.a))).slice(0, n);
+      }
       const groups = new Map();
       DATA.forEach((d) => {
+        if (skip.has(d.a)) return;
         const key = config.groupBy(d);
         if (key == null) return;
         if (!groups.has(key)) groups.set(key, []);
@@ -210,13 +232,21 @@
       });
       const pools = Array.from(groups.values()).map(shuffle);
       const items = [];
-      while (items.length < config.count && pools.some((p) => p.length)) {
+      while (items.length < n && pools.some((p) => p.length)) {
         for (const p of shuffle(pools)) {
-          if (items.length >= config.count) break;
+          if (items.length >= n) break;
           if (p.length) items.push(p.pop());
         }
       }
-      return shuffle(items);
+      return items;
+    }
+
+    // 每輪最多一半題目用來複習尚未答對的錯題，其餘照原規則抽新題
+    function pickItems() {
+      const dueCap = Math.min(config.count, Math.max(1, Math.floor(config.count / 2)));
+      const review = shuffle(unreviewedItems()).slice(0, dueCap);
+      const skip = new Set(review.map((d) => d.a));
+      return shuffle(review.concat(pickFresh(config.count - review.length, skip)));
     }
 
     function startSession() {
