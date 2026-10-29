@@ -38,6 +38,24 @@
     </header>
 
     <main class="home-main">
+      <article class="practice-card card" data-type="spell">
+        <a class="practice-link" href="spell-part/">
+          <div class="unit-icon is-small is-spell" aria-hidden="true">k+á</div>
+          <div class="unit-body">
+            <div class="unit-title-row">
+              <h2 class="unit-name">練拼寫</h2>
+              <svg class="unit-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </div>
+            <p class="unit-desc">聽音檔，選出聲母、韻母和聲調</p>
+          </div>
+        </a>
+        <div class="segmented practice-levels" role="radiogroup" aria-label="拼寫難度">
+          <button type="button" role="radio" data-level="part">聲母／韻母</button>
+          <button type="button" role="radio" data-level="iv">聲母＋韻母</button>
+          <button type="button" role="radio" data-level="ivt">聲＋韻＋聲調</button>
+        </div>
+      </article>
+
       <article class="practice-card card" data-type="tone">
         <a class="practice-link" href="tone-draw/">
           <div class="unit-icon" aria-hidden="true">á</div>
@@ -74,21 +92,22 @@
         </div>
       </article>
 
-      <article class="practice-card card" data-type="spell">
-        <a class="practice-link" href="spell-part/">
-          <div class="unit-icon is-small is-spell" aria-hidden="true">k+á</div>
+      <article class="practice-card card" data-type="type">
+        <a class="practice-link" href="type/">
+          <div class="unit-icon is-type" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15"/><path d="M8.5 4.5h7"/><path d="M8.5 19.5h7"/></svg>
+          </div>
           <div class="unit-body">
             <div class="unit-title-row">
-              <h2 class="unit-name">練拼寫</h2>
+              <h2 class="unit-name">練打字</h2>
               <svg class="unit-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
             </div>
-            <p class="unit-desc">聽音檔，選出聲母、韻母和聲調</p>
+            <p class="unit-desc">聽音檔，打出對應的台羅</p>
           </div>
         </a>
-        <div class="segmented practice-levels" role="radiogroup" aria-label="拼寫難度">
-          <button type="button" role="radio" data-level="part">聲母／韻母</button>
-          <button type="button" role="radio" data-level="iv">聲母＋韻母</button>
-          <button type="button" role="radio" data-level="ivt">聲＋韻＋聲調</button>
+        <div class="segmented practice-levels" role="radiogroup" aria-label="打字難度">
+          <button type="button" role="radio" data-level="1">本調（單音節）</button>
+          <button type="button" role="radio" data-level="2">本調＋變調（雙音節）</button>
         </div>
       </article>
     </main>
@@ -141,11 +160,13 @@
         tone: { '1': 'tone-draw/', '2': 'tone-draw-2/' },
         pitch: { '1': 'pitch-choice/', '2': 'pitch-choice-2/' },
         spell: { part: 'spell-part/', iv: 'spell-iv/', ivt: 'spell-ivt/' },
+        type: { '1': 'type/', '2': 'type-2/' },
       };
       const LEVEL_NAME = {
         tone: { '1': '本調（單音節）', '2': '本調＋變調（雙音節）' },
         pitch: { '1': '本調（單音節）', '2': '本調＋變調（雙音節）' },
         spell: { part: '補缺', iv: '聲韻', ivt: '聲韻調' },
+        type: { '1': '本調（單音節）', '2': '本調＋變調（雙音節）' },
       };
 
       const badge = document.getElementById('mistakeCount');

@@ -6,9 +6,10 @@
 
   // 錯題本的收納跟首頁標題同一套：先分練習，再分難度。新增單元時兩邊一起登記
   const GROUPS = [
+    { id: 'spell', name: '練拼寫', units: ['spell-1', 'spell-2', 'spell-3'] },
     { id: 'tone', name: '標聲調', units: ['tone-1', 'tone-2'] },
     { id: 'pitch', name: '選音值', units: ['pitch-1', 'pitch-2'] },
-    { id: 'spell', name: '練拼寫', units: ['spell-1', 'spell-2', 'spell-3'] },
+    { id: 'type', name: '練打字', units: ['type-1', 'type-2'] },
   ];
 
   const UNITS = {
@@ -19,6 +20,8 @@
     'spell-1': { group: 'spell', level: '聲母／韻母', href: 'spell-part/' },
     'spell-2': { group: 'spell', level: '聲母＋韻母', href: 'spell-iv/' },
     'spell-3': { group: 'spell', level: '聲＋韻＋聲調', href: 'spell-ivt/' },
+    'type-1': { group: 'type', level: '本調（單音節）', href: 'type/' },
+    'type-2': { group: 'type', level: '本調＋變調（雙音節）', href: 'type-2/' },
   };
 
   // 分組平均出題時，每組（聲調或變調規則）取詞頻最高的幾個當題庫；題庫檢查頁的「出題範圍」也依此計算
@@ -40,11 +43,12 @@
   // ---------- 練習設定（各單元通用） ----------
 
   const SETTINGS_KEY = 'lian-tailo:settings';
-  const LEVEL_DEFAULT = { tone: '1', pitch: '1', spell: 'part' };
+  const LEVEL_DEFAULT = { tone: '1', pitch: '1', spell: 'part', type: '1' };
   const LEVEL_OPTIONS = {
     tone: ['1', '2'],
     pitch: ['1', '2'],
     spell: ['part', 'iv', 'ivt'],
+    type: ['1', '2'],
   };
   const SETTINGS_DEFAULT = { count: 10, showHanji: true, level: LEVEL_DEFAULT };
   const COUNT_OPTIONS = [5, 10, 20, 30];

@@ -149,6 +149,11 @@ a { color: inherit; text-decoration: none; }
   color: #5a738c;
 }
 
+.unit-icon.is-type {
+  background: rgba(196, 154, 46, 0.16);
+  color: #b58a1e;
+}
+
 .unit-icon.is-spell {
   background: rgba(154, 112, 64, 0.14);
   color: #8f6a42;
@@ -422,6 +427,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-soft);
   font-size: 14px;
   text-align: center;
+  white-space: pre-line;
 }
 
 .status.is-warn { color: var(--wrong); }
@@ -613,6 +619,32 @@ a { color: inherit; text-decoration: none; }
 /* ---------- 拼寫 ---------- */
 
 .stage.is-spelling { flex-direction: column; gap: 10px; }
+
+.stage.is-type {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 28px 20px;
+}
+
+.type-input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  font-family: var(--font-iansui);
+  font-size: 42px;
+  line-height: 1.3;
+  color: var(--ink);
+  outline: none;
+}
+
+.type-input::placeholder {
+  color: var(--muted);
+  font-size: 22px;
+}
+
+.type-input:disabled { opacity: 1; -webkit-text-fill-color: var(--ink); }
 
 .spell-display {
   flex: none;

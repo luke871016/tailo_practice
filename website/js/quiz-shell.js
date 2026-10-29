@@ -2,7 +2,7 @@
 //
 // 各單元以「模式」掛上來，模式物件需提供：
 //   top: 'listen'（先聽音檔再作答）或 'prompt'（先看音節與漢字，作答後才播放）
-//   stage: 'svg'（畫在 SVG 上）或 'choices'（選擇題）
+//   stage: 'svg'（畫在 SVG 上）、'choices'（選擇題）或 'type'（文字輸入）
 //   actions: 作答按鈕 [{ action, label, style }]，action 為 clear / submit；選擇題可留空
 //   mount(api)、render(item)、refresh()、clear()、onStroke(stroke)
 //   submit(action) → null（不能送出）或 { ok, verdict, meta, answer, expect, answerPitch, expectPitch }
@@ -56,7 +56,9 @@
       : '<span class="btn btn-placeholder" aria-hidden="true"></span>';
     const stage = mode.stage === 'choices'
       ? '<div class="stage card is-choices" id="stage"><div class="choice-grid" id="choiceGrid"></div></div>'
-      : '<div class="stage card" id="stage"><svg id="stageSvg" xmlns="http://www.w3.org/2000/svg" aria-label="作答區"></svg></div>';
+      : mode.stage === 'type'
+        ? '<div class="stage card is-type" id="stage"><input class="type-input" id="typeInput" type="text" inputmode="text" enterkeyhint="done" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="台羅拼音"></div>'
+        : '<div class="stage card" id="stage"><svg id="stageSvg" xmlns="http://www.w3.org/2000/svg" aria-label="作答區"></svg></div>';
     return `
     <div class="app">
       <header class="topbar">
@@ -168,7 +170,7 @@
     ['helpBtn', 'quizView', 'resultView', 'progressBar', 'progressText', 'scoreText', 'playBtn', 'stage',
       'status', 'answerPanel', 'answerVerdict', 'answerWord', 'answerMeta', 'drawActions', 'nextActions',
       'submitBtn', 'nextBtn', 'resultScore', 'resultText', 'reviewWrap', 'reviewList', 'againBtn',
-      'helpSheet', 'helpClose', 'toneTable', 'sandhiChart', 'sandhiTable', 'promptRoman', 'promptHanji', 'hintHanji', 'choiceGrid'].forEach((id) => { el[id] = $(id); });
+      'helpSheet', 'helpClose', 'toneTable', 'sandhiChart', 'sandhiTable', 'promptRoman', 'promptHanji', 'hintHanji', 'choiceGrid', 'typeInput'].forEach((id) => { el[id] = $(id); });
     el.svg = $('stageSvg');
 
     const state = {
@@ -648,10 +650,11 @@
         return;
       }
       if (state.view !== 'quiz') return;
-      if (e.key === ' ') {
+      const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      if (e.key === ' ' && !typing) {
         e.preventDefault();
         if (state.item && !el.playBtn.disabled) play(state.item.a);
-      } else if (e.key === 'Enter') {
+      } else if (e.key === 'Enter' && !e.isComposing) {
         e.preventDefault();
         if (state.answered) nextQuestion();
         else if (el.submitBtn && !el.submitBtn.disabled) submit('submit');
