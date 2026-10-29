@@ -125,7 +125,7 @@
     'note.tone8': { zh: '第八調各地腔調不同，音檔以高降調為範例', tai: '第八調無仝所在腔口無仝，音檔以高降調做例' },
     'note.sandhi5': { zh: '第五調變調漳腔 5→7、泉腔 5→3，音檔以漳腔為範例', tai: '第五調變調漳腔 5→7、泉腔 5→3，音檔以漳腔做例' },
 
-    'spell.noInitial': { zh: '無聲母', tai: '無聲無' },
+    'spell.noInitial': { zh: '無聲母', tai: '無聲母' },
     'spell.none': { zh: '（無）', tai: '（無）' },
     'spell.meta': { zh: '聲母 {i}・韻母 {r}', tai: '聲母 {i}・韻母 {r}' },
     'spell.meta.tone': { zh: '聲母 {i}・韻母 {r}・第 {n} 調', tai: '聲母 {i}・韻母 {r}・第 {n} 調' },
