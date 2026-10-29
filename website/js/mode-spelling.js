@@ -68,6 +68,23 @@
     return value;
   };
 
+  const CHOICE_SPEAKER = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+
+  // 單音節辭典：聲母、韻母、調號對到詞頻最高的一筆音檔
+  const syllableAudio = new Map();
+  (window.TONE_SYLLABLES || []).forEach((entry) => {
+    if (!entry.p || entry.p.length !== 1 || !entry.a) return;
+    const [i, r, t] = entry.p[0];
+    const key = `${i}\0${r}\0${t}`;
+    const prev = syllableAudio.get(key);
+    if (!prev || entry.f > prev.f) syllableAudio.set(key, entry);
+  });
+
+  function audioFor(initial, final, tone) {
+    const entry = syllableAudio.get(`${initial}\0${final}\0${tone}`);
+    return entry ? entry.a : '';
+  }
+
   function create(options) {
     const kind = (options && options.kind) || 'iv';
     let api = null;
@@ -81,6 +98,43 @@
     let display = null;
     let reviewing = false;
     const confirmable = kind === 'iv' || kind === 'ivt';
+    const choiceAudio = new Audio();
+    choiceAudio.preload = 'auto';
+    let choiceAudioName = '';
+
+    let suppressChoiceStop = false;
+
+    function clearChoicePlaying() {
+      api.el.choiceGrid.querySelectorAll('.choice-play.is-playing').forEach((btn) => {
+        btn.classList.remove('is-playing');
+      });
+    }
+
+    function stopChoiceAudio() {
+      if (suppressChoiceStop) return;
+      choiceAudio.pause();
+      clearChoicePlaying();
+    }
+
+    function playChoice(fileName, btn) {
+      api.pauseAudio();
+      if (choiceAudioName === fileName && !choiceAudio.paused) {
+        choiceAudio.pause();
+        return;
+      }
+      suppressChoiceStop = true;
+      choiceAudio.pause();
+      clearChoicePlaying();
+      suppressChoiceStop = false;
+      if (choiceAudioName !== fileName) {
+        choiceAudioName = fileName;
+        choiceAudio.src = window.LianTailo.audioUrl(fileName);
+      }
+      try { choiceAudio.currentTime = 0; } catch (e) { /* 尚未載入 metadata */ }
+      btn.classList.add('is-playing');
+      const p = choiceAudio.play();
+      if (p && p.catch) p.catch(() => btn.classList.remove('is-playing'));
+    }
 
     const correctOf = (part) => (part === 'i' ? syl.i : part === 'r' ? syl.r : syl.t);
     const currentPart = () => steps[step];
@@ -163,8 +217,13 @@
       grid.textContent = '';
       grid.classList.toggle('is-two', choices.length <= 2);
       choices.forEach((value, i) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
+        const btn = document.createElement(part === 't' ? 'div' : 'button');
+        if (part === 't') {
+          btn.setAttribute('role', 'button');
+          btn.tabIndex = 0;
+        } else {
+          btn.type = 'button';
+        }
         btn.className = 'choice is-text';
         if (part === 't') {
           btn.innerHTML = '<span class="choice-main"></span><span class="choice-sub"></span>';
@@ -249,8 +308,28 @@
       if (!reviewing && step < steps.length) return null;
       if (confirmable && !reviewing) return null;
       const lastPart = steps[steps.length - 1];
+      const compareTones = kind === 'ivt' && lastPart === 't';
       [...api.el.choiceGrid.children].forEach((btn, i) => {
-        btn.disabled = true;
+        const file = compareTones ? audioFor(usedInitial(), usedFinal(), choices[i]) : '';
+        if (file) {
+          btn.classList.add('is-settled', 'has-audio');
+          btn.removeAttribute('tabindex');
+          const playBtn = document.createElement('button');
+          playBtn.type = 'button';
+          playBtn.className = 'choice-play';
+          playBtn.setAttribute('aria-label', '播放這個音');
+          playBtn.innerHTML = CHOICE_SPEAKER;
+          playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playChoice(file, playBtn);
+          });
+          btn.appendChild(playBtn);
+        } else if (btn.tagName === 'BUTTON') {
+          btn.disabled = true;
+        } else {
+          btn.classList.add('is-settled');
+          btn.removeAttribute('tabindex');
+        }
         btn.classList.toggle('is-correct', choices[i] === correctOf(lastPart));
         btn.classList.toggle('is-wrong', i === lastChoice && choices[i] !== correctOf(lastPart));
       });
@@ -282,6 +361,13 @@
       mount(shellApi) {
         api = shellApi;
         finals = options.finals || [];
+        ['pause', 'ended', 'error'].forEach((ev) => {
+          choiceAudio.addEventListener(ev, stopChoiceAudio);
+        });
+        api.el.playBtn.addEventListener('click', stopChoiceAudio);
+        document.addEventListener('keydown', (e) => {
+          if (e.key === ' ') stopChoiceAudio();
+        });
       },
       render,
       refresh,

@@ -137,9 +137,10 @@ a { color: inherit; text-decoration: none; }
   border-radius: 14px;
   background: var(--primary-soft);
   color: var(--primary);
-  font-family: var(--font-roman);
+  font-family: var(--font-iansui);
   font-size: 28px;
-  font-weight: 500;
+  font-weight: 400;
+  font-synthesis: none;
 }
 
 .unit-icon.is-small { font-size: 19px; letter-spacing: -0.02em; }
@@ -425,7 +426,10 @@ a { color: inherit; text-decoration: none; }
 .status {
   margin: 0 4px;
   color: var(--ink-soft);
+  font-family: var(--font-iansui);
   font-size: 14px;
+  font-weight: 400;
+  font-synthesis: none;
   text-align: center;
   white-space: pre-line;
 }
@@ -460,7 +464,7 @@ a { color: inherit; text-decoration: none; }
 
 .answer-word .hanji { margin-left: 10px; font-size: 22px; color: var(--ink-soft); }
 
-.answer-meta { color: var(--ink-soft); font-size: 13px; line-height: 1.45; white-space: pre-line; }
+.answer-meta { color: var(--ink-soft); font-family: var(--font-iansui); font-size: 13px; font-weight: 400; font-synthesis: none; line-height: 1.45; white-space: pre-line; }
 
 /* 先看題目再作答的單元：音節與漢字在上方，作答後才能播放 */
 .prompt {
@@ -539,7 +543,7 @@ a { color: inherit; text-decoration: none; }
 
 .review-answer { font-family: var(--font-iansui); font-size: 19px; font-weight: 400; font-synthesis: none; }
 
-.review-yours { color: var(--wrong); font-size: 13px; }
+.review-yours { color: var(--wrong); font-family: var(--font-iansui); font-size: 13px; font-weight: 400; font-synthesis: none; }
 
 .mini-play {
   flex: none;
@@ -583,6 +587,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .choice {
+  position: relative;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -677,7 +682,7 @@ a { color: inherit; text-decoration: none; }
 
 .spell-text { font-family: var(--font-iansui); font-size: 28px; font-weight: 400; font-synthesis: none; line-height: 1.2; white-space: nowrap; }
 
-.spell-slot.is-t .spell-text { font-family: var(--font); font-size: 20px; line-height: 1.68; }
+.spell-slot.is-t .spell-text { font-size: 20px; line-height: 1.68; }
 
 .spell-meta {
   display: flex;
@@ -691,7 +696,7 @@ a { color: inherit; text-decoration: none; }
 
 .spell-label { color: var(--muted); font-size: 11px; }
 
-.spell-fix { color: var(--primary); font-family: var(--font-roman); font-size: 13px; line-height: 1.25; }
+.spell-fix { color: var(--primary); font-family: var(--font-iansui); font-size: 13px; font-weight: 400; font-synthesis: none; line-height: 1.25; }
 
 .spell-slot.is-pending .spell-text { color: var(--line); }
 
@@ -717,7 +722,31 @@ a { color: inherit; text-decoration: none; }
 
 .choice-main { font-family: var(--font-iansui); font-size: 30px; font-weight: 400; font-synthesis: none; color: var(--ink); line-height: 1.2; }
 
-.choice-sub { color: var(--muted); font-size: 12px; }
+.choice-sub { color: var(--muted); font-family: var(--font-iansui); font-size: 12px; font-weight: 400; font-synthesis: none; }
+
+.choice.is-settled { pointer-events: none; cursor: default; }
+
+.choice.is-settled:not(.has-audio):not(.is-correct):not(.is-wrong) { opacity: 0.45; }
+
+.choice-play {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.choice-play:active { transform: scale(0.94); }
+
+.choice-play.is-playing { background: var(--primary-dark); }
 
 .choice.is-correct .choice-main { color: var(--primary); }
 
@@ -735,7 +764,7 @@ a { color: inherit; text-decoration: none; }
 
 .staff-divider { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; }
 
-.staff-caption { fill: var(--ink-soft); font-family: var(--font-roman); font-size: 13px; }
+.staff-caption { fill: var(--ink-soft); font-family: var(--font-iansui); font-size: 13px; font-weight: 400; }
 
 .pitch-svg.is-tiny { width: 96px; height: auto; display: block; }
 
@@ -767,9 +796,9 @@ a { color: inherit; text-decoration: none; }
 
 .sandhi-word { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
 
-.sandhi-word strong { font-size: 16px; font-weight: 600; }
+.sandhi-word strong { font-family: var(--font-iansui); font-size: 16px; font-weight: 400; font-synthesis: none; }
 
-.sandhi-word .roman { font-family: var(--font-roman); font-size: 13px; }
+.sandhi-word .roman { font-family: var(--font-iansui); font-size: 13px; font-weight: 400; font-synthesis: none; }
 
 .sandhi-word small { color: var(--muted); font-size: 11px; }
 
@@ -783,6 +812,9 @@ a { color: inherit; text-decoration: none; }
 .sandhi-play {
   margin-top: 2px;
   padding: 1px 7px;
+  font-family: var(--font-iansui);
+  font-weight: 400;
+  font-synthesis: none;
   border: 0;
   border-radius: 9px;
   background: var(--primary-soft);
@@ -1272,9 +1304,9 @@ button.setting-row:active { background: rgba(0, 0, 0, 0.03); }
   white-space: nowrap;
 }
 
-.tone-cell-word b { font-weight: 600; }
-
-.tone-cell-word .roman { font-family: var(--font-roman); }
+.tone-cell-word,
+.tone-cell-word b,
+.tone-cell-word .roman { font-family: var(--font-iansui); font-weight: 400; font-synthesis: none; }
 
 .tone-cell .mini-pitch { width: 44px; height: 28px; margin-top: 2px; }
 
@@ -1330,8 +1362,10 @@ ol.mark-order li::before {
 
 .mark-ex {
   color: var(--ink-soft);
-  font-family: var(--font-roman);
+  font-family: var(--font-iansui);
   font-size: 13px;
+  font-weight: 400;
+  font-synthesis: none;
 }
 
 .sandhi-chart-wrap { padding: 8px 4px 2px; }
@@ -1356,7 +1390,9 @@ ol.mark-order li::before {
 
 .sandhi-chart-label {
   fill: #6c7571;
+  font-family: var(--font-iansui);
   font-size: 12px;
+  font-weight: 400;
   text-anchor: middle;
   dominant-baseline: middle;
 }
@@ -1389,11 +1425,13 @@ ol.mark-order li::before {
 
 .mini-pitch .contour-stop { stroke-width: 1.3; }
 
+.roman { font-family: var(--font-iansui); font-weight: 400; font-synthesis: none; }
+
 .sheet-text { margin: 16px 2px 0; color: var(--ink-soft); font-size: 14px; }
 
 .sheet-text strong { color: var(--ink); font-weight: 600; }
 
-.sheet-text .roman { font-family: var(--font-roman); }
+.sheet-text .roman { font-family: var(--font-iansui); font-weight: 400; font-synthesis: none; }
 
 @keyframes fade-in { from { opacity: 0; } }
 

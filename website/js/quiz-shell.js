@@ -243,6 +243,8 @@
       setSubmitEnabled(enabled) { if (el.submitBtn) el.submitBtn.disabled = !enabled; },
       isAnswered: () => state.answered,
       submit: (action) => submit(action),
+      play,
+      pauseAudio() { audio.pause(); },
       clearInk() { if (state.inkLayer) state.inkLayer.textContent = ''; },
     };
 
