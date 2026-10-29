@@ -142,8 +142,8 @@
   function pitchCompare(expectPitch, answerPitch) {
     return `
       <div class="pitch-compare">
-        <span class="pitch-compare-item"><small>正解</small>${pitchSvg(expectPitch, { cls: 'is-tiny' })}</span>
-        <span class="pitch-compare-item is-wrong"><small>你選</small>${pitchSvg(answerPitch, { cls: 'is-tiny' })}</span>
+        <span class="pitch-compare-item"><small>${window.LianTailo.t('pitch.correct')}</small>${pitchSvg(expectPitch, { cls: 'is-tiny' })}</span>
+        <span class="pitch-compare-item is-wrong"><small>${window.LianTailo.t('pitch.yours')}</small>${pitchSvg(answerPitch, { cls: 'is-tiny' })}</span>
       </div>`;
   }
 
@@ -152,7 +152,9 @@
     const num = (x, y, t) => `<text class="sandhi-chart-num" x="${x}" y="${y}">${t}</text>`;
     const arc = (d) => `<path class="sandhi-chart-arrow" d="${d}"/>`;
     const label = (x, y, t) => `<text class="sandhi-chart-label" x="${x}" y="${y}">${t}</text>`;
-    return `<svg class="sandhi-chart" viewBox="0 0 372 196" role="img" aria-label="變調記憶圖。循環是 1 變 7、7 變 3、3 變 2、2 變 1。第 5 調漳腔變 7、泉腔變 3。第 4 調收 -h 變 2，否則變高促。第 8 調收 -h 變 3，否則變低促。">
+    const tr = window.LianTailo.t;
+    const note = window.LianTailo.sandhiNote;
+    return `<svg class="sandhi-chart" viewBox="0 0 372 196" role="img" aria-label="${tr('sandhi.chart.aria')}">
       <defs>
         <marker id="sandhiHead" markerUnits="userSpaceOnUse" viewBox="0 0 12 12" refX="0" refY="6" markerWidth="11" markerHeight="11" orient="auto">
           <path d="M0 1.2 L11 6 L0 10.8 Z" fill="#2b312e"/>
@@ -175,14 +177,14 @@
       ${num(114, 110, '5')}
       ${num(250, 52, '8')}
       ${num(250, 152, '4')}
-      ${label(86, 108, '漳')}
-      ${label(142, 108, '泉')}
-      ${label(207, 36, '-h')}
-      ${label(207, 170, '-h')}
-      ${label(290, 36, '非 -h')}
-      ${label(290, 136, '非 -h')}
-      ${label(338, 52, '低促')}
-      ${label(338, 152, '高促')}
+      ${label(86, 108, note('漳'))}
+      ${label(142, 108, note('泉'))}
+      ${label(207, 36, note('-h'))}
+      ${label(207, 170, note('-h'))}
+      ${label(290, 36, note('非 -h'))}
+      ${label(290, 136, note('非 -h'))}
+      ${label(338, 52, note('低促'))}
+      ${label(338, 152, note('高促'))}
     </svg>`;
   }
 

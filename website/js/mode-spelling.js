@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  const { shuffle, withTone } = window.LianTailo;
+  const { shuffle, withTone, t } = window.LianTailo;
 
   const INITIALS = ['', 'p', 'ph', 'b', 'm', 't', 'th', 'n', 'l', 'k', 'kh', 'g', 'ng', 'h', 'ts', 'tsh', 's', 'j'];
   // 容易混淆的聲母：同發音部位（送氣、濁音、鼻音），以及喉音與無聲母
@@ -20,7 +20,7 @@
   const CHECKED = /[ptkh]$/;
   const LONG_TONES = [1, 2, 3, 5, 7];
   const CHECKED_TONES = [4, 8];
-  const PART_NAME = { i: '聲母', r: '韻母', t: '聲調' };
+  const partName = (part) => t('part.' + part);
   const CHOICE_KEYS = ['1', '2', '3', '4'];
 
   function parseFinal(f) {
@@ -64,7 +64,7 @@
 
   const label = (part, value) => {
     if (part === 'i') return value || '∅';
-    if (part === 't') return `第 ${value} 調`;
+    if (part === 't') return t('tone.nth', { n: value });
     return value;
   };
 
@@ -188,7 +188,7 @@
         return `
           <button type="button" class="spell-slot is-${part} ${cls}${editable ? ' is-editable' : ''}" data-part="${part}"${editable ? '' : ' disabled'}>
             <span class="spell-text">${text}</span>
-            <span class="spell-meta">${fix}<span class="spell-label">${PART_NAME[part]}</span></span>
+            <span class="spell-meta">${fix}<span class="spell-label">${partName(part)}</span></span>
           </button>`;
       }).join('');
       display.querySelectorAll('.spell-slot.is-editable').forEach((btn) => {
@@ -231,7 +231,7 @@
           btn.querySelector('.choice-sub').textContent = label('t', value);
         } else {
           btn.innerHTML = '<span class="choice-main"></span>';
-          btn.querySelector('.choice-main').textContent = part === 'i' ? (value || '無聲母') : value;
+          btn.querySelector('.choice-main').textContent = part === 'i' ? (value || t('spell.noInitial')) : value;
         }
         if (reviewing && value === answers[part]) btn.classList.add('is-picked');
         btn.addEventListener('click', () => choose(i));
@@ -294,14 +294,14 @@
     function refresh() {
       if (api.isAnswered()) return;
       if (reviewing) {
-        api.setStatus('確認拼法後按「確定」。點聲母或韻母可以回去改');
+        api.setStatus(t('spell.status.review'));
         api.setSubmitEnabled(true);
         return;
       }
       api.setSubmitEnabled(false);
-      const name = PART_NAME[currentPart()];
-      if (kind === 'part') api.setStatus(`聽音檔，選出缺少的${name}`);
-      else api.setStatus(`第 ${step + 1} 步：選出${name}`);
+      const name = partName(currentPart());
+      if (kind === 'part') api.setStatus(t('spell.status.part', { name }));
+      else api.setStatus(t('spell.status.step', { n: step + 1, name }));
     }
 
     function submit() {
@@ -317,7 +317,7 @@
           const playBtn = document.createElement('button');
           playBtn.type = 'button';
           playBtn.className = 'choice-play';
-          playBtn.setAttribute('aria-label', '播放這個音');
+          playBtn.setAttribute('aria-label', t('action.play.this'));
           playBtn.innerHTML = CHOICE_SPEAKER;
           playBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -337,18 +337,20 @@
 
       const wrong = steps.filter((part) => answers[part] !== correctOf(part));
       const ok = wrong.length === 0;
-      let meta = `聲母 ${syl.i || '（無）'}・韻母 ${syl.r}`;
-      if (kind === 'ivt') meta += `・第 ${syl.t} 調`;
+      const initialShown = syl.i || t('spell.none');
+      let meta = kind === 'ivt'
+        ? t('spell.meta.tone', { i: initialShown, r: syl.r, n: syl.t })
+        : t('spell.meta', { i: initialShown, r: syl.r });
 
       let answer;
-      if (kind === 'part') answer = `${PART_NAME[steps[0]]} ${label(steps[0], answers[steps[0]])}`;
+      if (kind === 'part') answer = `${partName(steps[0])} ${label(steps[0], answers[steps[0]])}`;
       else if (kind === 'iv') answer = usedInitial() + usedFinal();
       else answer = withTone(usedInitial(), usedFinal(), answers.t);
-      if (!ok && kind !== 'part') meta += `　你的拼法：${answer}`;
+      if (!ok && kind !== 'part') meta += '　' + t('spell.yours', { answer });
 
       return {
         ok,
-        verdict: ok ? '' : `${wrong.map((p) => PART_NAME[p]).join('、')}不對`,
+        verdict: ok ? '' : t('spell.wrong', { parts: wrong.map((p) => partName(p)).join('、') }),
         meta,
         answer,
       };
@@ -357,7 +359,7 @@
     return {
       top: 'listen',
       stage: 'choices',
-      actions: confirmable ? [{ action: 'submit', label: '確定', style: 'primary' }] : [],
+      actions: confirmable ? [{ action: 'submit', label: t('action.submit'), style: 'primary' }] : [],
       mount(shellApi) {
         api = shellApi;
         finals = options.finals || [];

@@ -957,6 +957,18 @@ a { color: inherit; text-decoration: none; }
 
 .settings { padding: 4px 0; margin-bottom: 8px; }
 
+.credits {
+  margin: 14px 4px 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.credits p { margin: 0; }
+
+.credits a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
 .setting-row {
   display: flex;
   align-items: center;

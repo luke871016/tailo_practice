@@ -1,7 +1,19 @@
 (function () {
   'use strict';
 
-  const { GROUPS, UNITS, audioUrl, mistakes, pitchCompare } = window.LianTailo;
+  const { GROUPS, UNITS, audioUrl, mistakes, pitchCompare, t } = window.LianTailo;
+
+  const LEVEL_KEY = {
+    'tone-1': 'level.base',
+    'tone-2': 'level.sandhi',
+    'pitch-1': 'level.base',
+    'pitch-2': 'level.sandhi',
+    'spell-1': 'level.spell.part',
+    'spell-2': 'level.spell.iv',
+    'spell-3': 'level.spell.ivt',
+    'type-1': 'level.base',
+    'type-2': 'level.sandhi',
+  };
 
   const ICON_PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
   const ICON_DELETE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
@@ -23,14 +35,14 @@
   const groupById = (id) => GROUPS.find((g) => g.id === id);
   const groupName = (id) => {
     const group = groupById(id);
-    return group ? group.name : id;
+    return group ? t('group.' + id) : id;
   };
-  const levelName = (unit) => (UNITS[unit] ? UNITS[unit].level : unit);
+  const levelName = (unit) => (LEVEL_KEY[unit] ? t(LEVEL_KEY[unit]) : (UNITS[unit] ? UNITS[unit].level : unit));
 
   function formatDate(ts) {
     const d = new Date(ts);
     const today = new Date();
-    if (d.toDateString() === today.toDateString()) return '今天';
+    if (d.toDateString() === today.toDateString()) return t('date.today');
     const sameYear = d.getFullYear() === today.getFullYear();
     return `${sameYear ? '' : `${d.getFullYear()}/`}${d.getMonth() + 1}/${d.getDate()}`;
   }
@@ -54,12 +66,12 @@
   }
 
   function scopeText(value) {
-    if (value === 'all') return '所有錯題';
+    if (value === 'all') return t('mistakes.all.scope');
     const group = groupById(value);
-    if (group) return `「${group.name}」的錯題`;
+    if (group) return t('mistakes.scope.named', { name: t('group.' + group.id) });
     const info = UNITS[value];
-    const name = info ? `${groupName(info.group)}・${info.level}` : value;
-    return `「${name}」的錯題`;
+    const name = info ? `${groupName(info.group)}・${levelName(value)}` : value;
+    return t('mistakes.scope.named', { name });
   }
 
   function addChip(parent, label, count, active, onClick) {
@@ -76,7 +88,7 @@
     const known = new Set(GROUPS.flatMap((g) => g.units));
     const groups = GROUPS.map((g) => ({
       id: g.id,
-      name: g.name,
+      name: t('group.' + g.id),
       units: g.units.filter((unit) => counts[unit]),
       count: g.units.reduce((sum, unit) => sum + (counts[unit] || 0), 0),
     })).filter((g) => g.count);
@@ -111,7 +123,7 @@
     el.filters.hidden = !showGroups;
     el.filters.textContent = '';
     if (showGroups) {
-      addChip(el.filters, '全部', all.length, filter === 'all', () => {
+      addChip(el.filters, t('mistakes.all'), all.length, filter === 'all', () => {
         filter = 'all';
         render();
       });
@@ -127,9 +139,9 @@
     el.levels.textContent = '';
     el.levels.classList.toggle('is-root', levelsAreRoot);
     if (showLevels) {
-      el.levels.setAttribute('aria-label', `${active.name}的分類`);
+      el.levels.setAttribute('aria-label', t('mistakes.levels', { name: active.name }));
       if (levelsAreRoot) {
-        addChip(el.levels, '全部', all.length, filter === 'all', () => {
+        addChip(el.levels, t('mistakes.all'), all.length, filter === 'all', () => {
           filter = 'all';
           render();
         });
@@ -152,8 +164,8 @@
     if (!info) return unit;
     const pickedUnit = filter !== 'all' && !groupById(filter);
     if (pickedUnit) return '';
-    if (groupById(filter) || singlePractice) return info.level;
-    return `${groupName(info.group)}・${info.level}`;
+    if (groupById(filter) || singlePractice) return levelName(unit);
+    return `${groupName(info.group)}・${levelName(unit)}`;
   }
 
   function renderItem(m, singlePractice) {
@@ -166,12 +178,12 @@
         ${m.expectPitch && m.answerPitch ? pitchCompare(m.expectPitch, m.answerPitch) : '<div class="review-yours"></div>'}
         <div class="mistake-meta"></div>
       </div>
-      <button class="mini-play" type="button" aria-label="播放">${ICON_PLAY}</button>
-      <button class="mini-delete" type="button" aria-label="移出錯題本">${ICON_DELETE}</button>`;
+      <button class="mini-play" type="button" aria-label="${t('action.play.short')}">${ICON_PLAY}</button>
+      <button class="mini-delete" type="button" aria-label="${t('mistakes.remove')}">${ICON_DELETE}</button>`;
     li.querySelector('.review-hanji').textContent = m.h;
     li.querySelector('.review-answer').textContent = m.s;
     const yours = li.querySelector('.review-yours');
-    if (yours) yours.textContent = `你的答案：${m.answer}`;
+    if (yours) yours.textContent = t('quiz.yours', { answer: m.answer });
 
     const meta = li.querySelector('.mistake-meta');
     const label = categoryLabel(m.unit, singlePractice);
@@ -182,12 +194,12 @@
     }
     const stat = document.createElement('span');
     stat.className = 'mistake-stat';
-    stat.textContent = `錯 ${m.count} 次・${formatDate(m.lastAt)}`;
+    stat.textContent = t('mistakes.times', { n: m.count, date: formatDate(m.lastAt) });
     meta.appendChild(stat);
     if (m.fixedAt > m.lastAt) {
       const tag = document.createElement('span');
       tag.className = 'tag';
-      tag.textContent = '已答對';
+      tag.textContent = t('mistakes.fixed');
       meta.prepend(tag);
     }
 
@@ -213,12 +225,12 @@
     el.empty.hidden = shown.length > 0;
     el.footer.hidden = shown.length === 0;
     el.hint.hidden = !shown.some((m) => m.fixedAt > m.lastAt);
-    el.clearBtn.textContent = filter === 'all' ? '清空錯題本' : `清空${scopeText(filter)}`;
+    el.clearBtn.textContent = filter === 'all' ? t('mistakes.clear.all') : t('mistakes.clear.scope', { scope: scopeText(filter) });
   }
 
   el.clearBtn.addEventListener('click', () => {
     const scope = scopeText(filter);
-    if (!window.confirm(`確定要清空${scope}嗎？`)) return;
+    if (!window.confirm(t('mistakes.clear.confirm', { scope }))) return;
     mistakes.clear(unitsInFilter(filter));
     render();
   });

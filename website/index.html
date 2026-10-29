@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#efefef">
-  <title>練台羅 Liān Tâi-lô</title>
+  <title data-i18n="brand.title">練台羅 Liān Tâi-lô</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235c8273'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='white' font-family='sans-serif'%3E%C3%A1%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,15 +23,15 @@
   <div class="app">
     <header class="home-header">
       <div>
-        <h1 class="home-title">練台羅 Liān Tâi-lô</h1>
-        <p class="home-subtitle">一起練習基本功</p>
+        <h1 class="home-title" data-i18n="brand.title">練台羅 Liān Tâi-lô</h1>
+        <p class="home-subtitle" data-i18n="home.subtitle">一起練習基本功</p>
       </div>
       <div class="home-tools">
-        <a class="icon-btn home-tool" href="mistakes/" aria-label="錯題本">
+        <a class="icon-btn home-tool" href="mistakes/" data-i18n-aria="home.mistakes" aria-label="錯題本">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="m10 8 4 4m0-4-4 4"/></svg>
           <span class="count-badge home-badge" id="mistakeCount" hidden></span>
         </a>
-        <button class="icon-btn" id="settingsBtn" type="button" aria-label="練習設定" aria-haspopup="dialog" aria-controls="settingsSheet" aria-expanded="false">
+        <button class="icon-btn" id="settingsBtn" type="button" data-i18n-aria="home.settings" aria-label="練習設定" aria-haspopup="dialog" aria-controls="settingsSheet" aria-expanded="false">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
       </div>
@@ -43,16 +43,16 @@
           <div class="unit-icon is-small is-spell" aria-hidden="true">k+á</div>
           <div class="unit-body">
             <div class="unit-title-row">
-              <h2 class="unit-name">練拼寫</h2>
+              <h2 class="unit-name" data-i18n="group.spell">練拼寫</h2>
               <svg class="unit-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
             </div>
-            <p class="unit-desc">聽音檔，選出聲母、韻母和聲調</p>
+            <p class="unit-desc" data-i18n="desc.spell">聽音檔，選出聲母、韻母和聲調</p>
           </div>
         </a>
-        <div class="segmented practice-levels" role="radiogroup" aria-label="拼寫難度">
-          <button type="button" role="radio" data-level="part">聲母／韻母</button>
-          <button type="button" role="radio" data-level="iv">聲母＋韻母</button>
-          <button type="button" role="radio" data-level="ivt">聲＋韻＋聲調</button>
+        <div class="segmented practice-levels" role="radiogroup" data-i18n-aria="aria.level.spell" aria-label="拼寫難度">
+          <button type="button" role="radio" data-level="part" data-i18n="level.spell.part">聲母／韻母</button>
+          <button type="button" role="radio" data-level="iv" data-i18n="level.spell.iv">聲母＋韻母</button>
+          <button type="button" role="radio" data-level="ivt" data-i18n="level.spell.ivt">聲＋韻＋聲調</button>
         </div>
       </article>
 
@@ -61,15 +61,15 @@
           <div class="unit-icon" aria-hidden="true">á</div>
           <div class="unit-body">
             <div class="unit-title-row">
-              <h2 class="unit-name">標聲調</h2>
+              <h2 class="unit-name" data-i18n="group.tone">標聲調</h2>
               <svg class="unit-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
             </div>
-            <p class="unit-desc">聽音檔，在正確的字母上方畫出調符</p>
+            <p class="unit-desc" data-i18n="desc.tone">聽音檔，在正確的字母上方畫出調符</p>
           </div>
         </a>
-        <div class="segmented practice-levels" role="radiogroup" aria-label="畫聲調難度">
-          <button type="button" role="radio" data-level="1">本調（單音節）</button>
-          <button type="button" role="radio" data-level="2">本調＋變調（雙音節）</button>
+        <div class="segmented practice-levels" role="radiogroup" data-i18n-aria="aria.level.tone" aria-label="畫聲調難度">
+          <button type="button" role="radio" data-level="1" data-i18n="level.base">本調（單音節）</button>
+          <button type="button" role="radio" data-level="2" data-i18n="level.sandhi">本調＋變調（雙音節）</button>
         </div>
       </article>
 
@@ -80,15 +80,15 @@
           </div>
           <div class="unit-body">
             <div class="unit-title-row">
-              <h2 class="unit-name">選音值</h2>
+              <h2 class="unit-name" data-i18n="group.pitch">選音值</h2>
               <svg class="unit-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
             </div>
-            <p class="unit-desc">看常用詞，選出前字變調後的音值圖</p>
+            <p class="unit-desc" data-i18n="desc.pitch">看常用詞，選出前字變調後的音值圖</p>
           </div>
         </a>
-        <div class="segmented practice-levels" role="radiogroup" aria-label="選音值難度">
-          <button type="button" role="radio" data-level="1">本調（單音節）</button>
-          <button type="button" role="radio" data-level="2">本調＋變調（雙音節）</button>
+        <div class="segmented practice-levels" role="radiogroup" data-i18n-aria="aria.level.pitch" aria-label="選音值難度">
+          <button type="button" role="radio" data-level="1" data-i18n="level.base">本調（單音節）</button>
+          <button type="button" role="radio" data-level="2" data-i18n="level.sandhi">本調＋變調（雙音節）</button>
         </div>
       </article>
 
@@ -99,15 +99,15 @@
           </div>
           <div class="unit-body">
             <div class="unit-title-row">
-              <h2 class="unit-name">練打字</h2>
+              <h2 class="unit-name" data-i18n="group.type">練打字</h2>
               <svg class="unit-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
             </div>
-            <p class="unit-desc">聽音檔，打出對應的台羅</p>
+            <p class="unit-desc" data-i18n="desc.type">聽音檔，打出對應的台羅</p>
           </div>
         </a>
-        <div class="segmented practice-levels" role="radiogroup" aria-label="打字難度">
-          <button type="button" role="radio" data-level="1">本調（單音節）</button>
-          <button type="button" role="radio" data-level="2">本調＋變調（雙音節）</button>
+        <div class="segmented practice-levels" role="radiogroup" data-i18n-aria="aria.level.type" aria-label="打字難度">
+          <button type="button" role="radio" data-level="1" data-i18n="level.base">本調（單音節）</button>
+          <button type="button" role="radio" data-level="2" data-i18n="level.sandhi">本調＋變調（雙音節）</button>
         </div>
       </article>
     </main>
@@ -116,46 +116,57 @@
   <div class="sheet" id="settingsSheet" hidden>
     <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <div class="sheet-handle"></div>
-      <h2 class="sheet-title" id="settingsTitle">練習設定</h2>
+      <h2 class="sheet-title" id="settingsTitle" data-i18n="home.settings">練習設定</h2>
       <div class="settings card">
         <div class="setting-row is-stack">
           <div class="setting-text">
-            <p class="setting-name">每次練習題數</p>
+            <p class="setting-name" data-i18n="settings.lang">介面語言</p>
           </div>
-          <div class="segmented" id="countSetting" role="radiogroup" aria-label="每次練習題數"></div>
+          <div class="segmented" id="langSetting" role="radiogroup" data-i18n-aria="settings.lang" aria-label="介面語言"></div>
+        </div>
+        <div class="setting-row is-stack">
+          <div class="setting-text">
+            <p class="setting-name" data-i18n="settings.count">每次練習題數</p>
+          </div>
+          <div class="segmented" id="countSetting" role="radiogroup" data-i18n-aria="settings.count" aria-label="每次練習題數"></div>
         </div>
         <label class="setting-row" for="hanjiSetting">
           <div class="setting-text">
-            <p class="setting-name">題目顯示漢字</p>
-            <p class="setting-desc">作答後的解答一律會顯示漢字</p>
+            <p class="setting-name" data-i18n="settings.hanji">題目顯示漢字</p>
+            <p class="setting-desc" data-i18n="settings.hanji.desc">作答後的解答一律會顯示漢字</p>
           </div>
           <input class="switch" type="checkbox" id="hanjiSetting" role="switch">
         </label>
         <button class="setting-row" id="installBtn" type="button">
           <div class="setting-text">
-            <p class="setting-name">安裝到主畫面</p>
-            <p class="setting-desc" id="installDesc">加到手機主畫面，像 App 一樣打開</p>
+            <p class="setting-name" data-i18n="settings.install">安裝到主畫面</p>
+            <p class="setting-desc" id="installDesc" data-i18n="settings.install.desc">加到手機主畫面，像 App 一樣打開</p>
           </div>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
         </button>
       </div>
+      <footer class="credits">
+        <p><span data-i18n="credit.author">網頁作者：</span><a href="https://kiantiong.com/" target="_blank" rel="noopener noreferrer">Tân Kiàn-tiong</a></p>
+        <p><span data-i18n="credit.source">專案原始碼：</span><a href="https://github.com/luke871016/tailo_practice" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+      </footer>
     </div>
   </div>
 
   <div class="sheet" id="installSheet" hidden>
     <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="installTitle">
       <div class="sheet-handle"></div>
-      <h2 class="sheet-title" id="installTitle">安裝到主畫面</h2>
-      <p class="sheet-text install-lead" id="installLead">加到主畫面後，不用再開瀏覽器就能練習。</p>
+      <h2 class="sheet-title" id="installTitle" data-i18n="install.title">安裝到主畫面</h2>
+      <p class="sheet-text install-lead" id="installLead" data-i18n="install.lead">加到主畫面後，不用再開瀏覽器就能練習。</p>
       <ol class="install-steps" id="installSteps"></ol>
-      <button class="btn btn-primary btn-block" id="installAction" type="button">知道了</button>
+      <button class="btn btn-primary btn-block" id="installAction" type="button" data-i18n="install.done">知道了</button>
     </div>
   </div>
 
+  <script src="js/i18n.js"></script>
   <script src="js/common.js"></script>
   <script>
     (function () {
-      const { settings } = LianTailo;
+      const { settings, t } = LianTailo;
       const HREF = {
         tone: { '1': 'tone-draw/', '2': 'tone-draw-2/' },
         pitch: { '1': 'pitch-choice/', '2': 'pitch-choice-2/' },
@@ -163,13 +174,14 @@
         type: { '1': 'type/', '2': 'type-2/' },
       };
       const LEVEL_NAME = {
-        tone: { '1': '本調（單音節）', '2': '本調＋變調（雙音節）' },
-        pitch: { '1': '本調（單音節）', '2': '本調＋變調（雙音節）' },
-        spell: { part: '補缺', iv: '聲韻', ivt: '聲韻調' },
-        type: { '1': '本調（單音節）', '2': '本調＋變調（雙音節）' },
+        tone: { '1': 'level.base', '2': 'level.sandhi' },
+        pitch: { '1': 'level.base', '2': 'level.sandhi' },
+        spell: { part: 'level.spell.part.short', iv: 'level.spell.iv.short', ivt: 'level.spell.ivt.short' },
+        type: { '1': 'level.base', '2': 'level.sandhi' },
       };
 
       const badge = document.getElementById('mistakeCount');
+      const langGroup = document.getElementById('langSetting');
       const countGroup = document.getElementById('countSetting');
       const hanjiSwitch = document.getElementById('hanjiSetting');
       const settingsBtn = document.getElementById('settingsBtn');
@@ -183,7 +195,7 @@
           const link = card.querySelector('.practice-link');
           const name = card.querySelector('.unit-name').textContent;
           link.href = HREF[type][current];
-          link.setAttribute('aria-label', '開始' + name + '，' + LEVEL_NAME[type][current]);
+          link.setAttribute('aria-label', t('home.start', { name, level: t(LEVEL_NAME[type][current]) }));
           card.querySelectorAll('.practice-levels button').forEach((btn) => {
             const on = btn.dataset.level === current;
             btn.classList.toggle('is-active', on);
@@ -196,11 +208,26 @@
         const n = LianTailo.mistakes.list().length;
         badge.hidden = n === 0;
         badge.textContent = n;
-        badge.parentElement.setAttribute('aria-label', n ? '錯題本，' + n + ' 題' : '錯題本');
+        badge.parentElement.setAttribute('aria-label', n ? t('home.mistakes.count', { n }) : t('home.mistakes'));
       }
 
       function renderSettings() {
         const s = settings.get();
+        langGroup.textContent = '';
+        settings.LANG_OPTIONS.forEach((code) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.setAttribute('role', 'radio');
+          btn.setAttribute('aria-checked', String(code === s.lang));
+          btn.className = code === s.lang ? 'is-active' : '';
+          btn.textContent = t(code === 'tai' ? 'lang.tai' : 'lang.zh');
+          btn.addEventListener('click', () => {
+            if (code === s.lang) return;
+            settings.set({ lang: code });
+            location.reload();
+          });
+          langGroup.appendChild(btn);
+        });
         countGroup.textContent = '';
         settings.COUNT_OPTIONS.forEach((n) => {
           const btn = document.createElement('button');
@@ -265,11 +292,11 @@
       let deferredInstall = null;
 
       const INSTALL_COPY = ios ? {
-        lead: '用 Safari 打開這個網頁，照下面三步加到主畫面。',
-        steps: ['點畫面底部的分享按鈕', '往下滑，選「加入主畫面」', '按右上角的「加入」'],
+        lead: 'install.lead.ios',
+        steps: ['install.ios.1', 'install.ios.2', 'install.ios.3'],
       } : {
-        lead: '用 Chrome 或系統瀏覽器打開，照下面步驟加到主畫面。',
-        steps: ['點瀏覽器右上角的選單', '選「加到主畫面」或「安裝應用程式」', '確認名稱後按「安裝」或「新增」'],
+        lead: 'install.lead.other',
+        steps: ['install.other.1', 'install.other.2', 'install.other.3'],
       };
 
       function markInstallSeen() {
@@ -278,8 +305,8 @@
 
       function fillInstallSteps() {
         installLead.textContent = deferredInstall
-          ? '可以把它加到主畫面，之後不用再開瀏覽器。'
-          : INSTALL_COPY.lead;
+          ? t('install.lead.prompt')
+          : t(INSTALL_COPY.lead);
         installSteps.hidden = !!deferredInstall;
         installSteps.textContent = '';
         if (!deferredInstall) {
@@ -289,12 +316,12 @@
             num.className = 'install-step-num';
             num.textContent = String(i + 1);
             const body = document.createElement('span');
-            body.textContent = text;
+            body.textContent = t(text);
             li.append(num, body);
             installSteps.appendChild(li);
           });
         }
-        installAction.textContent = deferredInstall ? '安裝' : '知道了';
+        installAction.textContent = deferredInstall ? t('install.action') : t('install.done');
       }
 
       function openInstall(fromHint) {
@@ -311,7 +338,7 @@
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredInstall = e;
-        installDesc.textContent = '加到主畫面，像 App 一樣打開';
+        installDesc.textContent = t('settings.install.ready');
       });
 
       window.addEventListener('appinstalled', () => {

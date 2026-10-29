@@ -21,6 +21,7 @@
 </head>
 <body class="page-fit">
   <script src="../data/tone-syllables.js"></script>
+  <script src="../js/i18n.js"></script>
   <script src="../js/common.js"></script>
   <script src="../js/tones.js"></script>
   <script src="../js/quiz-shell.js"></script>
@@ -32,7 +33,7 @@
       QuizShell.create(
         {
           unit: 'spell-2',
-          title: '聲韻拼寫',
+          title: LianTailo.t('page.spell.iv'),
           data,
           groupBy: (d) => d.p[0][2],
           poolPerGroup: LianTailo.POOL_PER_GROUP.tone,

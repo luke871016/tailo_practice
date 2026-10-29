@@ -50,7 +50,8 @@
     spell: ['part', 'iv', 'ivt'],
     type: ['1', '2'],
   };
-  const SETTINGS_DEFAULT = { count: 10, showHanji: true, level: LEVEL_DEFAULT };
+  const LANG_OPTIONS = ['zh', 'tai'];
+  const SETTINGS_DEFAULT = { count: 10, showHanji: true, lang: 'zh', level: LEVEL_DEFAULT };
   const COUNT_OPTIONS = [5, 10, 20, 30];
 
   function normalizeLevel(raw) {
@@ -63,11 +64,13 @@
 
   const settings = {
     COUNT_OPTIONS,
+    LANG_OPTIONS,
     get() {
       try {
         const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
         const s = Object.assign({}, SETTINGS_DEFAULT, saved);
         if (!COUNT_OPTIONS.includes(s.count)) s.count = SETTINGS_DEFAULT.count;
+        if (!LANG_OPTIONS.includes(s.lang)) s.lang = SETTINGS_DEFAULT.lang;
         s.showHanji = !!s.showHanji;
         s.level = normalizeLevel(s.level);
         return s;

@@ -59,22 +59,22 @@
     let input = null;
     let parts = null;
 
-    const HINT = '可以輸入正式調號（hóo）或數字調號（hoo2）。\n連字符、空白可以省略';
+    const hint = () => window.LianTailo.t('type.hint');
 
     function sync() {
       if (!input || api.isAnswered()) return;
       api.setSubmitEnabled(input.value.trim().length > 0);
-      api.setStatus(HINT);
+      api.setStatus(hint());
     }
 
     return {
       top: 'listen',
       stage: 'type',
-      actions: [{ action: 'submit', label: '確定', style: 'primary' }],
+      actions: [{ action: 'submit', label: window.LianTailo.t('action.submit'), style: 'primary' }],
       mount(shellApi) {
         api = shellApi;
         input = shellApi.el.typeInput;
-        input.placeholder = '輸入答案';
+        input.placeholder = window.LianTailo.t('type.placeholder');
         input.addEventListener('input', sync);
       },
       render(item) {
@@ -98,8 +98,8 @@
         input.disabled = true;
         return {
           ok,
-          verdict: ok ? '' : '拼法不對',
-          meta: ok ? '' : `你的拼法：${typed}`,
+          verdict: ok ? '' : window.LianTailo.t('type.wrong'),
+          meta: ok ? '' : window.LianTailo.t('spell.yours', { answer: typed }),
           answer: typed,
         };
       },

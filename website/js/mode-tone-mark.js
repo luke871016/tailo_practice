@@ -131,17 +131,19 @@
     return { correct, user, ok };
   }
 
-  function reasonText(r, subject) {
-    if (!r.correct) return `${subject}不用標調符`;
-    if (!r.user) return `${subject}需要標調符`;
-    const prefix = subject === '這個音節' ? '' : `${subject}：`;
-    if (r.user.tone === r.correct.tone) return `${prefix}調符對了，位置不對`;
-    if (r.user.index === r.correct.index) return `${prefix}位置對了，調符不對`;
-    return `${prefix}調符和位置都不對`;
+  function reasonText(r, subjectKey, vars) {
+    const { t } = window.LianTailo;
+    const subject = t(subjectKey, vars);
+    if (!r.correct) return t('mark.noNeed', { subject });
+    if (!r.user) return t('mark.need', { subject });
+    const single = subjectKey === 'mark.syl';
+    if (r.user.tone === r.correct.tone) return t(single ? 'mark.bad.place' : 'mark.bad.place.s', { subject });
+    if (r.user.index === r.correct.index) return t(single ? 'mark.bad.mark' : 'mark.bad.mark.s', { subject });
+    return t(single ? 'mark.bad.both' : 'mark.bad.both.s', { subject });
   }
 
   function create() {
-    const drawHint = '在韻母上方畫出調符。不用調符就留白，按「確定」送出。';
+    const drawHint = () => window.LianTailo.t('mark.hint');
     let api = null;
     let syls = [];
     let markLayer = null;
@@ -216,8 +218,8 @@
       if (syls.length === 1) {
         const s = syls[0];
         const parts = [];
-        if (s.i) parts.push({ label: '聲母', from: 0, to: s.i.length - 1 });
-        parts.push({ label: '韻母', from: s.i.length, to: s.base.length - 1 });
+        if (s.i) parts.push({ label: window.LianTailo.t('part.i'), from: 0, to: s.i.length - 1 });
+        parts.push({ label: window.LianTailo.t('part.r'), from: s.i.length, to: s.base.length - 1 });
         const by = s.baseline + 40;
         parts.forEach((p) => {
           const x1 = s.letters[p.from].x + 2;
@@ -318,9 +320,9 @@
       const single = syls.length === 1;
 
       api.setSubmitEnabled(!anyUnknown);
-      if (anyUnknown) api.setStatus('認不出這個符號，請再畫一次', true);
-      else if (anyStroke) api.setStatus(single ? '按「確定」送出，或直接重畫' : '畫好了就按「確定」，可以再修改');
-      else api.setStatus(drawHint);
+      if (anyUnknown) api.setStatus(window.LianTailo.t('mark.unknown'), true);
+      else if (anyStroke) api.setStatus(single ? window.LianTailo.t('mark.ready.one') : window.LianTailo.t('mark.ready.two'));
+      else api.setStatus(drawHint());
     }
 
     function clear() {
@@ -338,7 +340,7 @@
       const results = syls.map((s) => judgeSyllable(s, s.guess));
       const ok = results.every((r) => r.ok);
       const answer = single && !results[0].user
-        ? '無調符'
+        ? window.LianTailo.t('mark.none')
         : syls.map((s, k) => composeSyllable(s.base, results[k].user)).join('-');
 
       api.clearInk();
@@ -351,19 +353,21 @@
       let verdict = '';
       if (!ok) {
         const wrongIdx = results.map((r, k) => (r.ok ? -1 : k)).filter((k) => k >= 0);
-        if (single) verdict = reasonText(results[0], '這個音節');
-        else if (wrongIdx.length === syls.length) verdict = '兩個音節都不對';
-        else verdict = reasonText(results[wrongIdx[0]], `第 ${wrongIdx[0] + 1} 個音節`);
+        if (single) verdict = reasonText(results[0], 'mark.syl');
+        else if (wrongIdx.length === syls.length) verdict = window.LianTailo.t('mark.both');
+        else verdict = reasonText(results[wrongIdx[0]], 'mark.syl.n', { n: wrongIdx[0] + 1 });
       }
 
-      let meta = `第 ${syls.map((s) => s.t).join('、')} 調`;
-      if (!ok) meta += `　你的答案：${answer}`;
+      const tones = syls.map((s) => s.t).join('、');
+      const meta = ok
+        ? window.LianTailo.t('mark.meta', { tones })
+        : window.LianTailo.t('mark.meta.yours', { tones, answer });
       return { ok, verdict, meta, answer };
     }
 
     const actions = [
-      { action: 'clear', label: '重畫', style: 'ghost' },
-      { action: 'submit', label: '確定', style: 'primary' },
+      { action: 'clear', label: window.LianTailo.t('action.clear'), style: 'ghost' },
+      { action: 'submit', label: window.LianTailo.t('action.submit'), style: 'primary' },
     ];
 
     return {

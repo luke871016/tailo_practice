@@ -21,6 +21,7 @@
 </head>
 <body class="page-fit">
   <script src="../data/sandhi-words.js"></script>
+  <script src="../js/i18n.js"></script>
   <script src="../js/common.js"></script>
   <script src="../js/tones.js"></script>
   <script src="../js/quiz-shell.js"></script>
@@ -29,7 +30,7 @@
     QuizShell.create(
       {
         unit: 'type-2',
-        title: '練打字・雙音節',
+        title: LianTailo.t('page.type.2'),
         data: window.SANDHI_WORDS.filter((d) => !d.x),
         groupBy: (d) => d.rule,
         poolPerGroup: LianTailo.POOL_PER_GROUP.sandhiRule,

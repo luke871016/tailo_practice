@@ -5,7 +5,7 @@
   'use strict';
 
   const {
-    shuffle, TONES, TONE_BY_NUMBER, PITCH_NAME, TONE_8_NOTE, SANDHI_5_NOTE, acceptedPitches, pitchSvg,
+    shuffle, TONES, TONE_BY_NUMBER, PITCH_NAME, acceptedPitches, pitchSvg, t, pitchLabel,
   } = window.LianTailo;
 
   const CITATIONS = TONES.map((t) => t.pitch);
@@ -15,10 +15,7 @@
 
   const citation = (tone) => TONE_BY_NUMBER[tone].pitch;
   const keyOf = (option) => option.join('-');
-  const nameOf = (pitch) => {
-    const n = PITCH_NAME[pitch];
-    return /^\d$/.test(n) ? `第 ${n} 調` : n;
-  };
+  const nameOf = (pitch) => pitchLabel(pitch);
 
   function singleOptions(item) {
     const tone = item.p[0][2];
@@ -61,7 +58,9 @@
     const [, final1, tone1] = item.p[0];
     let from = String(tone1);
     if (tone1 === 4 || tone1 === 8) from += final1.endsWith('h') ? 'h' : 'ptk';
-    return `${from} → ${PITCH_NAME[item.sd] || item.sd}`;
+    const named = PITCH_NAME[item.sd];
+    const to = named === '高促' || named === '低促' ? pitchLabel(item.sd) : (named || item.sd);
+    return `${from} → ${to}`;
   }
 
   function create(options) {
@@ -86,7 +85,7 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'choice';
-        btn.setAttribute('aria-label', `選項 ${i + 1}`);
+        btn.setAttribute('aria-label', t('pitch.choice', { n: i + 1 }));
         btn.innerHTML = pitchSvg(choice);
         btn.addEventListener('click', () => {
           if (api.isAnswered()) return;
@@ -100,11 +99,11 @@
     function refresh() {
       if (api.isAnswered()) return;
       if (kind === 'sandhi') {
-        api.setStatus('選出這個詞實際唸的音值');
+        api.setStatus(t('pitch.status.word'));
         return;
       }
-      if (item.p[0][2] === 8) api.setStatus(TONE_8_NOTE);
-      else api.setStatus('選出這個音節的音值');
+      if (item.p[0][2] === 8) api.setStatus(t('note.tone8'));
+      else api.setStatus(t('pitch.status.one'));
     }
 
     function submit() {
@@ -124,21 +123,21 @@
       const notes = [];
       if (kind === 'single') {
         const tone = item.p[0][2];
-        if (!ok) verdict = '音值不對';
-        meta = `第 ${tone} 調`;
-        if (tone === 8) notes.push(TONE_8_NOTE);
+        if (!ok) verdict = t('pitch.wrong');
+        meta = t('tone.nth', { n: tone });
+        if (tone === 8) notes.push(t('note.tone8'));
       } else {
         const [tone1, tone2] = [item.p[0][2], item.p[1][2]];
         if (!ok) {
           const firstOk = answer[0] === correct[0];
           const secondOk = answer[1] === correct[1];
-          if (firstOk) verdict = '前字變調對了，後字不對';
-          else if (secondOk) verdict = answer[0] === citation(tone1) ? '前字要變調' : '前字變調不對';
-          else verdict = '前字和後字都不對';
+          if (firstOk) verdict = t('pitch.wrong.second');
+          else if (secondOk) verdict = answer[0] === citation(tone1) ? t('pitch.wrong.need') : t('pitch.wrong.first');
+          else verdict = t('pitch.wrong.both');
         }
-        meta = `前字變調 ${sandhiRuleText(item)}・後字第 ${tone2} 調`;
-        if (tone1 === 5) notes.push(SANDHI_5_NOTE);
-        if (tone2 === 8) notes.push(TONE_8_NOTE);
+        meta = t('pitch.meta.sandhi', { rule: sandhiRuleText(item), n: tone2 });
+        if (tone1 === 5) notes.push(t('note.sandhi5'));
+        if (tone2 === 8) notes.push(t('note.tone8'));
       }
       if (notes.length) meta += `\n${notes.join('；')}`;
 

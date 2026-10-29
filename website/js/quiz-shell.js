@@ -10,8 +10,8 @@
   'use strict';
 
   const {
-    audioUrl, shuffle, mistakes, TONES, TONE_BY_NUMBER, TONE_8_NOTE, SANDHI_RULES,
-    miniPitchSvg, pitchCompare, sandhiChartSvg,
+    audioUrl, shuffle, mistakes, TONES, TONE_BY_NUMBER, SANDHI_RULES,
+    miniPitchSvg, pitchCompare, sandhiChartSvg, t, sandhiNote,
   } = window.LianTailo;
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const MIN_STROKE = 14;
@@ -38,12 +38,12 @@
       return `
         <div class="prompt">
           <p class="prompt-word"><span id="promptRoman"></span><span class="hanji" id="promptHanji"></span></p>
-          <button class="play-btn is-small" id="playBtn" type="button" aria-label="播放音檔" disabled>${ICON_SPEAKER}</button>
+          <button class="play-btn is-small" id="playBtn" type="button" aria-label="${t('action.play')}" disabled>${ICON_SPEAKER}</button>
         </div>`;
     }
     return `
       <div class="play-wrap">
-        <button class="play-btn" id="playBtn" type="button" aria-label="播放音檔">${ICON_SPEAKER}</button>
+        <button class="play-btn" id="playBtn" type="button" aria-label="${t('action.play')}">${ICON_SPEAKER}</button>
         <span class="play-hanji" id="hintHanji" hidden></span>
       </div>`;
   }
@@ -57,14 +57,14 @@
     const stage = mode.stage === 'choices'
       ? '<div class="stage card is-choices" id="stage"><div class="choice-grid" id="choiceGrid"></div></div>'
       : mode.stage === 'type'
-        ? '<div class="stage card is-type" id="stage"><input class="type-input" id="typeInput" type="text" inputmode="text" enterkeyhint="done" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="台羅拼音"></div>'
-        : '<div class="stage card" id="stage"><svg id="stageSvg" xmlns="http://www.w3.org/2000/svg" aria-label="作答區"></svg></div>';
+        ? `<div class="stage card is-type" id="stage"><input class="type-input" id="typeInput" type="text" inputmode="text" enterkeyhint="done" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="${t('aria.type')}"></div>`
+        : `<div class="stage card" id="stage"><svg id="stageSvg" xmlns="http://www.w3.org/2000/svg" aria-label="${t('aria.stage')}"></svg></div>`;
     return `
     <div class="app">
       <header class="topbar">
-        <a class="icon-btn" href="../" aria-label="回首頁">${ICON_BACK}</a>
+        <a class="icon-btn" href="../" aria-label="${t('nav.home')}">${ICON_BACK}</a>
         <h1 class="topbar-title">${cfg.title}</h1>
-        <button class="icon-btn" id="helpBtn" type="button" aria-label="聲調說明">${ICON_HELP}</button>
+        <button class="icon-btn" id="helpBtn" type="button" aria-label="${t('nav.help')}">${ICON_HELP}</button>
       </header>
 
       <section class="view" id="quizView">
@@ -82,7 +82,7 @@
         </div>
         <div class="actions" id="drawActions">${actions}</div>
         <div class="actions" id="nextActions" hidden>
-          <button class="btn btn-primary btn-block" id="nextBtn" type="button">下一題</button>
+          <button class="btn btn-primary btn-block" id="nextBtn" type="button">${t('action.next')}</button>
         </div>
       </section>
 
@@ -92,12 +92,12 @@
           <div class="result-text" id="resultText"></div>
         </div>
         <div class="review-wrap" id="reviewWrap">
-          <p class="review-title">這輪答錯的題目（已加入錯題本）</p>
+          <p class="review-title">${t('quiz.review.title')}</p>
           <ul class="review-list card" id="reviewList"></ul>
         </div>
         <div class="result-actions">
-          <button class="btn btn-primary btn-block" id="againBtn" type="button">再練一輪</button>
-          <a class="btn btn-ghost btn-block" href="../">回首頁</a>
+          <button class="btn btn-primary btn-block" id="againBtn" type="button">${t('action.again')}</button>
+          <a class="btn btn-ghost btn-block" href="../">${t('nav.home')}</a>
         </div>
       </section>
     </div>
@@ -106,23 +106,23 @@
       <div class="help-frame" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
         <header class="topbar">
           <span class="icon-btn" aria-hidden="true"></span>
-          <h2 class="topbar-title" id="helpTitle">聲調說明</h2>
-          <button class="icon-btn" id="helpClose" type="button" aria-label="返回">${ICON_BACK}</button>
+          <h2 class="topbar-title" id="helpTitle">${t('nav.help')}</h2>
+          <button class="icon-btn" id="helpClose" type="button" aria-label="${t('nav.back')}">${ICON_BACK}</button>
         </header>
-        <div class="segmented help-tabs" role="tablist" aria-label="聲調說明分頁">
-          <button type="button" role="tab" id="helpTabTone" aria-controls="helpPanelTone" aria-selected="true" class="is-active">聲調</button>
-          <button type="button" role="tab" id="helpTabMark" aria-controls="helpPanelMark" aria-selected="false">調符的位置</button>
-          <button type="button" role="tab" id="helpTabSandhi" aria-controls="helpPanelSandhi" aria-selected="false">變調規則</button>
+        <div class="segmented help-tabs" role="tablist" aria-label="${t('aria.help.tabs')}">
+          <button type="button" role="tab" id="helpTabTone" aria-controls="helpPanelTone" aria-selected="true" class="is-active">${t('help.tab.tone')}</button>
+          <button type="button" role="tab" id="helpTabMark" aria-controls="helpPanelMark" aria-selected="false">${t('help.tab.mark')}</button>
+          <button type="button" role="tab" id="helpTabSandhi" aria-controls="helpPanelSandhi" aria-selected="false">${t('help.tab.sandhi')}</button>
         </div>
         <div class="help-body">
         <div id="helpPanelTone" role="tabpanel" aria-labelledby="helpTabTone">
           <div class="tone-grid" id="toneTable"></div>
-          <p class="sheet-text">點例字可以聽本調。音值圖由上到下是音高由高到低（五度標音的 5 到 1），線尾的圓圈表示入聲短促收尾。${TONE_8_NOTE}。</p>
+          <p class="sheet-text">${t('help.tone.lead', { note: t('note.tone8') })}</p>
         </div>
         <div id="helpPanelMark" role="tabpanel" aria-labelledby="helpTabMark" hidden>
           <section class="mark-block">
-            <h3>oo、ng 標在前面的字母</h3>
-            <p class="sheet-text"><span class="roman">oo</span> 標在第一個 <span class="roman">o</span>，<span class="roman">ng</span> 標在 <span class="roman">n</span>。成音節的 <span class="roman">m</span> 只有一個字母，調符標在 <span class="roman">m</span>。</p>
+            <h3>${t('help.mark.h1')}</h3>
+            <p class="sheet-text">${t('help.mark.p1')}</p>
             <ul class="mark-order">
               <li><span class="roman">oo</span><span class="mark-ex">koo → kóo</span></li>
               <li><span class="roman">ng</span><span class="mark-ex">ng → ńg</span></li>
@@ -130,8 +130,8 @@
             </ul>
           </section>
           <section class="mark-block">
-            <h3>複元音標在主要元音</h3>
-            <p class="sheet-text">主要元音是響度較大、嘴型較開的那個。有 <span class="roman">a</span> 就標 <span class="roman">a</span>；沒有就標 <span class="roman">o</span> 或 <span class="roman">e</span>；再沒有才標 <span class="roman">i</span> 或 <span class="roman">u</span>。</p>
+            <h3>${t('help.mark.h2')}</h3>
+            <p class="sheet-text">${t('help.mark.p2')}</p>
             <ol class="mark-order">
               <li><span class="mark-key roman">a</span><span class="mark-ex">ai → ái、au → áu、ia → iá、ua → uá、iau → iáu</span></li>
               <li><span class="mark-key"><span class="roman">o</span>、<span class="roman">e</span></span><span class="mark-ex">io → ió、ue → ué</span></li>
@@ -139,20 +139,20 @@
             </ol>
           </section>
           <section class="mark-block">
-            <h3>iu、ui 標在後面的字母</h3>
-            <p class="sheet-text"><span class="roman">iu</span> 和 <span class="roman">ui</span> ，調符標在後面那個字母。</p>
+            <h3>${t('help.mark.h3')}</h3>
+            <p class="sheet-text">${t('help.mark.p3')}</p>
             <ul class="mark-order">
               <li><span class="roman">iu</span><span class="mark-ex">kiu → kiú</span></li>
               <li><span class="roman">ui</span><span class="mark-ex">kui → kuí</span></li>
             </ul>
           </section>
-          <p class="sheet-text">第 1 調，以及第 4 調（<span class="roman">-p、-t、-k、-h</span> 結尾）不標調符。例如 <span class="roman">ka</span>、<span class="roman">kah</span>、<span class="roman">kak</span>。</p>
+          <p class="sheet-text">${t('help.mark.plain')}</p>
         </div>
         <div id="helpPanelSandhi" role="tabpanel" aria-labelledby="helpTabSandhi" hidden>
           <div class="sandhi-chart-wrap card" id="sandhiChart"></div>
-          <p class="sheet-text">箭頭指向變調後的調。變調欄聽前字相同的雙音節詞，本調欄聽這個字單唸。</p>
+          <p class="sheet-text">${t('help.sandhi.lead')}</p>
           <div class="sandhi-table card" id="sandhiTable"></div>
-          <p class="sheet-text">第五調變調漳腔 5→7、泉腔 5→3。第 4、8 調收 <span class="roman">-h</span> 會拉長變舒聲；收 <span class="roman">-p、-t、-k</span> 仍是短促，只分成高促、低促。後字維持本調。</p>
+          <p class="sheet-text">${t('help.sandhi.tail')}</p>
         </div>
         </div>
       </div>
@@ -164,6 +164,7 @@
     const config = Object.assign({ poolSize: 300 }, cfg, { count: userSettings.count });
     const DATA = config.data || [];
 
+    document.title = t('page.doc', { title: config.title, brand: t('brand.short') });
     document.body.insertAdjacentHTML('afterbegin', template(config, mode));
     const $ = (id) => document.getElementById(id);
     const el = {};
@@ -199,7 +200,7 @@
     }
 
     function setStatus(text, warn) {
-      if (state.needsTap && !warn && !state.answered && mode.top === 'listen') text = '點一下喇叭播放音檔';
+      if (state.needsTap && !warn && !state.answered && mode.top === 'listen') text = t('quiz.tap');
       el.status.textContent = text;
       el.status.classList.toggle('is-warn', !!warn);
     }
@@ -367,8 +368,8 @@
       const n = state.items.length;
       const done = state.index + (state.answered ? 1 : 0);
       el.progressBar.style.width = `${(done / n) * 100}%`;
-      el.progressText.textContent = `第 ${state.index + 1} / ${n} 題`;
-      el.scoreText.textContent = `答對 ${state.score}`;
+      el.progressText.textContent = t('quiz.progress', { i: state.index + 1, n });
+      el.scoreText.textContent = t('quiz.score', { n: state.score });
     }
 
     // ---------- 畫筆 ----------
@@ -440,7 +441,7 @@
       }
 
       el.stage.classList.add(r.ok ? 'is-correct' : 'is-wrong');
-      el.answerVerdict.textContent = r.ok ? '答對了' : r.verdict;
+      el.answerVerdict.textContent = r.ok ? t('quiz.correct') : r.verdict;
       el.answerVerdict.className = `answer-verdict ${r.ok ? 'is-correct' : 'is-wrong'}`;
       el.answerWord.textContent = item.s;
       const hanji = document.createElement('span');
@@ -479,10 +480,10 @@
       total.textContent = ` / ${n}`;
       el.resultScore.append(total);
       el.resultText.textContent =
-        rate === 1 ? '全部答對，真厲害！'
-          : rate >= 0.8 ? '表現很好，繼續保持'
-            : rate >= 0.5 ? '不錯，再練幾輪會更熟'
-              : '多練幾次，慢慢就會抓到聲調';
+        rate === 1 ? t('quiz.result.perfect')
+          : rate >= 0.8 ? t('quiz.result.great')
+            : rate >= 0.5 ? t('quiz.result.ok')
+              : t('quiz.result.more');
 
       el.reviewList.textContent = '';
       el.reviewWrap.hidden = state.wrong.length === 0;
@@ -495,11 +496,11 @@
             <div class="review-answer"></div>
             ${w.expectPitch ? pitchCompare(w.expectPitch, w.answerPitch) : '<div class="review-yours"></div>'}
           </div>
-          <button class="mini-play" type="button" aria-label="播放">${ICON_PLAY}</button>`;
+          <button class="mini-play" type="button" aria-label="${t('action.play.short')}">${ICON_PLAY}</button>`;
         li.querySelector('.review-hanji').textContent = w.item.h;
         li.querySelector('.review-answer').textContent = w.item.s;
         const yours = li.querySelector('.review-yours');
-        if (yours) yours.textContent = `你的答案：${w.answer}`;
+        if (yours) yours.textContent = t('quiz.yours', { answer: w.answer });
         li.querySelector('.mini-play').addEventListener('click', () => play(w.item.a));
         el.reviewList.appendChild(li);
       });
@@ -515,15 +516,15 @@
     }
 
     function toneLabel(tone) {
-      return `第 ${tone} 調`;
+      return t('tone.nth', { n: tone });
     }
 
     function buildHelp() {
       const toneByNumber = {};
-      TONES.forEach((t) => { toneByNumber[t.tone] = t; });
+      TONES.forEach((tone) => { toneByNumber[tone.tone] = tone; });
       [1, 2, 3, 4, 5, 6, 7, 8].forEach((n) => {
-        const t = toneByNumber[n];
-        if (!t) {
+        const tone = toneByNumber[n];
+        if (!tone) {
           const gap = document.createElement('div');
           gap.className = 'tone-cell-gap';
           gap.setAttribute('aria-hidden', 'true');
@@ -534,15 +535,15 @@
         cell.type = 'button';
         cell.className = 'tone-cell';
         cell.innerHTML = `
-          <span class="tone-cell-no">${t.tone}</span>
-          <span class="tone-cell-name">${t.name}</span>
+          <span class="tone-cell-no">${tone.tone}</span>
+          <span class="tone-cell-name">${t('toneName.' + tone.tone)}</span>
           <span class="tone-cell-word"><b></b> <span class="roman"></span></span>
-          ${miniPitchSvg(t.pitch)}
-          <span class="tone-cell-value">${pitchText(t.pitch)}</span>`;
-        cell.querySelector('b').textContent = t.hanji;
-        cell.querySelector('.roman').textContent = t.s;
-        cell.setAttribute('aria-label', `聽第 ${t.tone} 調，${t.hanji}，${t.s}`);
-        cell.addEventListener('click', () => play(t.a));
+          ${miniPitchSvg(tone.pitch)}
+          <span class="tone-cell-value">${pitchText(tone.pitch)}</span>`;
+        cell.querySelector('b').textContent = tone.hanji;
+        cell.querySelector('.roman').textContent = tone.s;
+        cell.setAttribute('aria-label', t('help.listen', { n: tone.tone, hanji: tone.hanji, s: tone.s }));
+        cell.addEventListener('click', () => play(tone.a));
         el.toneTable.appendChild(cell);
       });
 
@@ -550,26 +551,26 @@
       SANDHI_RULES.forEach((r) => {
         const base = r.base || Number(r.from);
         const citation = TONE_BY_NUMBER[base].pitch;
-        const changedName = /^\d+$/.test(String(r.to)) ? toneLabel(r.to) : r.to;
+        const changedName = /^\d+$/.test(String(r.to)) ? toneLabel(r.to) : sandhiNote(r.to);
         const row = document.createElement('div');
         row.className = 'sandhi-row';
         const sandhiPlay = r.wa
           ? `<button type="button" class="sandhi-play" data-audio="sandhi">${r.word}</button>`
-          : '<span class="sandhi-missing">無這腔音檔</span>';
+          : `<span class="sandhi-missing">${t('sandhi.missing')}</span>`;
         row.innerHTML = `
           <div class="sandhi-word">
             <strong></strong>
             <span class="roman"></span>
-            <small>${toneLabel(base)}${r.note ? `・${r.note}` : ''}</small>
+            <small>${toneLabel(base)}${r.note ? `・${sandhiNote(r.note)}` : ''}</small>
           </div>
           <div class="sandhi-pitch is-changed">
-            <small>變調・${changedName}</small>
+            <small>${t('sandhi.changed', { name: changedName })}</small>
             ${miniPitchSvg(r.pitch)}
             <b>${pitchText(r.pitch)}</b>
             ${sandhiPlay}
           </div>
           <div class="sandhi-pitch">
-            <small>本調・${toneLabel(base)}</small>
+            <small>${t('sandhi.base', { name: toneLabel(base) })}</small>
             ${miniPitchSvg(citation)}
             <b>${pitchText(citation)}</b>
             <button type="button" class="sandhi-play" data-audio="base"></button>
@@ -615,7 +616,7 @@
     audio.addEventListener('error', () => {
       if (state.view === 'quiz' && (mode.top === 'listen' ? !state.answered : state.answered)) {
         el.status.hidden = false;
-        setStatus('音檔載入失敗，請確認網路連線', true);
+        setStatus(t('quiz.audio.fail'), true);
       }
     });
 
